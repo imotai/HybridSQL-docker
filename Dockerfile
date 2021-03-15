@@ -19,8 +19,9 @@ LABEL org.opencontainers.image.source https://github.com/4paradigm/HybridSQL-doc
 RUN rm -r /etc/yum.repos.d/*
 COPY --chown=root:root etc/yum.repos.d/CentOs-Base.repo /etc/yum.repos.d/
 
-RUN yum install -y autoconf automake unzip bc expect libtool \
-    && yum clean all
+RUN yum update -y && \
+    yum install -y autoconf automake unzip bc expect libtool && \
+    yum clean all
 
 ENTRYPOINT [ "/bin/bash" ]
 
