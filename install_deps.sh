@@ -15,6 +15,7 @@
 # limitations under the License.
 
 set -eE
+set -x
 
 DEPS_SOURCE=$(pwd)/thirdsrc
 DEPS_PREFIX=$(pwd)/thirdparty
@@ -202,12 +203,14 @@ if [ -f "glog_succ" ]
 then
     echo "glog exist"
 else
-    wget -q $PACKAGE_MIRROR/glogs-v0.4.0.tar.gz
-    tar zxf glogs-v0.4.0.tar.gz
+    echo "installing glog ..."
+    wget -q $PACKAGE_MIRROR/glog-v0.4.0.tar.gz
+    tar xzf glog-v0.4.0.tar.gz
     pushd glog-0.4.0
     ./autogen.sh && CXXFLAGS=-fPIC ./configure --prefix="$DEPS_PREFIX" && make install
     popd
     touch glog_succ
+    echo "installed glog"
 fi
 
 if [ -f "brpc_succ" ]
