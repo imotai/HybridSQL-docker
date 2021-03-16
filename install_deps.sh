@@ -494,3 +494,25 @@ else
     touch thrift_succ
 fi
 
+wget -q http://ftp.iij.ad.jp/pub/linux/centos-vault/centos/6.9/sclo/x86_64/rh/devtoolset-7/libasan4-7.2.1-1.el6.x86_64.rpm
+wget -q http://ftp.iij.ad.jp/pub/linux/centos-vault/centos/6.9/sclo/x86_64/rh/devtoolset-7/devtoolset-7-libasan-devel-7.2.1-1.el6.x86_64.rpm
+yum install -y devtoolset-7-libasan-devel-7.2.1-1.el6.x86_64.rpm libasan4-7.2.1-1.el6.x86_64.rpm
+
+wget -q -O doxygen-1.8.19.src.tar.gz  https://github.com/doxygen/doxygen/archive/Release_1_8_19.tar.gz
+
+tar xzvf ./doxygen-1.8.19.src.tar.gz
+
+cd ./doxygen-1.8.19/
+
+sed -i '/pedantic/d' ./cmake/CompilerWarnings.cmake
+sed -i '/double-promotion/d' ./cmake/CompilerWarnings.cmake
+
+mkdir build
+
+cd build
+
+cmake -G "Unix Makefiles" ..
+
+make -j"$(nproc)"
+
+make install

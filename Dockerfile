@@ -36,14 +36,7 @@ RUN yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.4
 COPY --chown=root:root ./install_deps.sh /depends/
 RUN cd /depends && source /opt/rh/devtoolset-7/enable && bash install_deps.sh
 
-COPY --chown=root:root ./install_doxygen.sh /depends/
-RUN /depends/install_doxygen.sh
-
 RUN wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.rpm && rpm -i scala-2.12.8.rpm && rm scala-2.12.8.rpm
-# RUN yum install -y nodejs npm
-
-COPY --chown=root:root ./install_asan_centos6.sh /depends/
-RUN cd /depends && bash /depends/install_asan_centos6.sh
 
 # Remove dynamic library files for static link
 RUN find /depends/thirdparty/lib/ -name "lib*so*" | grep -v "libRemarks" | grep -v "libLTO" | xargs rm
