@@ -17,15 +17,12 @@ FROM centos:6 AS base
 LABEL org.opencontainers.image.source https://github.com/4paradigm/HybridSQL-docker
 
 # since centos 6 is dead, replace with a backup mirror
-RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-         -e 's|^#baseurl=http://mirror.centos.org/centos/|baseurl=http://vault.centos.org/centos/|g' \
-         -i.bak \
-         /etc/yum.repos.d/CentOS-*.repo
+COPY --chown=root:root etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/
 
 RUN yum update -y && yum install -y centos-release-scl && yum clean all
 
 RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-         -e 's|^#\s*baseurl=http://mirror.centos.org/centos/|baseurl=http://vault.centos.org/centos/|g' \
+         -e 's|^#\s*baseurl=http://mirror.centos.org/centos/6/|baseurl=http://vault.centos.org/6.10/|g' \
          -i.bak \
          /etc/yum.repos.d/CentOS-SCLo-*.repo
 
