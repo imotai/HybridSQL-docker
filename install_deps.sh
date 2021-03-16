@@ -17,6 +17,9 @@
 set -eE
 set -x
 
+source /opt/rh/devtoolset-7/enable
+source /opt/rh/sclo-git212/enable
+
 DEPS_SOURCE=$(pwd)/thirdsrc
 DEPS_PREFIX=$(pwd)/thirdparty
 DEPS_CONFIG="--prefix=${DEPS_PREFIX} --disable-shared --with-pic"
@@ -207,7 +210,8 @@ else
     wget $PACKAGE_MIRROR/glog-0.4.0.tar.gz
     tar xzf glog-0.4.0.tar.gz
     pushd glog-0.4.0
-    ./autogen.sh && CXXFLAGS=-fPIC ./configure --prefix="$DEPS_PREFIX" && make install
+    ./autogen.sh && CXXFLAGS=-fPIC ./configure --prefix="$DEPS_PREFIX"
+    make -j"$(nproc)" install
     popd
     touch glog_succ
     echo "installed glog"
@@ -276,7 +280,8 @@ else
     wget https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz
     tar zxf flex-2.6.4.tar.gz
     pushd flex-2.6.4
-    ./autogen.sh && ./configure --prefix="$DEPS_PREFIX" && make -j"$(nproc)" install
+    ./autogen.sh && ./configure --prefix="$DEPS_PREFIX"
+    make -j"$(nproc)" install
     popd
     touch flex_succ
 fi
@@ -344,7 +349,7 @@ if [ -f "lz4_succ" ]
 then
     echo " lz4 exist"
 else
-    wget https://github.com/lz4/lz4/archive/v1.7.5.tar.gz
+    wget -O lz4-1.7.5.tar.gz https://github.com/lz4/lz4/archive/v1.7.5.tar.gz
     tar -zxf lz4-1.7.5.tar.gz
     pushd lz4-1.7.5
     make -j"$(nproc)"
@@ -370,7 +375,7 @@ if [ -f "swig_succ" ]
 then
     echo "swig exist"
 else
-    wget https://github.com/swig/swig/archive/v4.0.1.tar.gz
+    wget -O swig-4.0.1.tar.gz https://github.com/swig/swig/archive/v4.0.1.tar.gz
     tar -zxf swig-4.0.1.tar.gz
     pushd swig-4.0.1
     ./autogen.sh
@@ -385,7 +390,7 @@ if [ -f "jemalloc_succ" ]
 then
     echo "jemalloc installed"
 else
-    wget https://github.com/jemalloc/jemalloc/archive/5.2.1.tar.gz
+    wget -O jemalloc-5.2.1.tar.gz https://github.com/jemalloc/jemalloc/archive/5.2.1.tar.gz
     tar -zxf jemalloc-5.2.1.tar.gz
     pushd jemalloc-5.2.1
     ./autogen.sh
@@ -400,7 +405,7 @@ if [ -f "flatbuffer_succ" ]
 then
     echo "flatbuffer installed"
 else
-    wget https://github.com/google/flatbuffers/archive/v1.11.0.tar.gz
+    wget -O flatbuffers-1.11.0.tar.gz https://github.com/google/flatbuffers/archive/v1.11.0.tar.gz
     tar -zxf flatbuffers-1.11.0.tar.gz
     pushd flatbuffers-1.11.0
     mkdir -p build
@@ -444,7 +449,7 @@ if [ -f "sqlite_succ" ]
 then
     echo "sqlite installed"
 else
-    wget https://github.com/sqlite/sqlite/archive/version-3.32.3.zip
+    wget -O sqlite-3.32.3.zip https://github.com/sqlite/sqlite/archive/version-3.32.3.zip
     unzip sqlite-*.zip
     pushd sqlite-3.32.3
     mkdir -p build

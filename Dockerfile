@@ -34,7 +34,8 @@ RUN yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.4
     yum clean all
 
 COPY --chown=root:root ./install_deps.sh /depends/
-RUN cd /depends && source /opt/rh/devtoolset-7/enable && bash install_deps.sh
+WORKDIR /depends
+RUN bash install_deps.sh
 
 RUN wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.rpm && rpm -i scala-2.12.8.rpm && rm scala-2.12.8.rpm
 
