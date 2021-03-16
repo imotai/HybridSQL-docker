@@ -33,6 +33,16 @@ fi
 
 pushd "$DEPS_SOURCE"
 
+if ! command -v cmake ; then
+    wget https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7.tar.gz
+    tar xvzf cmake-3.*
+    pushd cmake-3.19.7
+    ./bootstrap --prefix=/usr/local
+    make -j"$(nproc)"
+    make install
+    popd
+fi
+
 if [ ! -f gtest_succ ]; then
     echo "installing gtest ...."
     wget $PACKAGE_MIRROR/googletest-release-1.10.0.tar.gz
@@ -53,14 +63,14 @@ then
     echo "zlib exist"
 else
     echo "installing zlib..."
-    wget http://pkg.4paradigm.com/rtidb/dev/zlib-1.2.11.tar.gz
+    wget https://github.com/madler/zlib/archive/v1.2.11.tar.gz
     tar zxf zlib-1.2.11.tar.gz
-    cd zlib-1.2.11
+    pushd zlib-1.2.11
     sed -i '/CFLAGS="${CFLAGS--O3}"/c\  CFLAGS="${CFLAGS--O3} -fPIC"' configure
-    ./configure --static --prefix=${DEPS_PREFIX}
-    make -j4
+    ./configure --static --prefix="$DEPS_PREFIX"
+    make -j"$(nproc)"
     make install
-    cd -
+    popd
     touch zlib_succ
     echo "install zlib done"
 fi
@@ -147,15 +157,15 @@ else
     touch gperf_tool
 fi
 
-if [ -f "rapjson_succ" ]
-then
-    echo "rapjson exist"
-else
-    wget $PACKAGE_MIRROR/rapidjson.1.1.0.tar.gz
-    tar -zxvf rapidjson.1.1.0.tar.gz
-    cp -rf rapidjson-1.1.0/include/rapidjson "$DEPS_PREFIX/include"
-    touch rapjson_succ
-fi
+# if [ -f "rapjson_succ" ]
+# then
+#     echo "rapjson exist"
+# else
+#     wget $PACKAGE_MIRROR/rapidjson.1.1.0.tar.gz
+#     tar -zxvf rapidjson.1.1.0.tar.gz
+#     cp -rf rapidjson-1.1.0/include/rapidjson "$DEPS_PREFIX/include"
+#     touch rapjson_succ
+# fi
 
 if [ -f "leveldb_succ" ]
 then
@@ -176,15 +186,15 @@ if [ -f "openssl_succ" ]
 then
     echo "openssl exist"
 else
-    wget -O OpenSSL_1_1_0.zip http://pkg.4paradigm.com/rtidb/dev/OpenSSL_1_1_0.zip
+    wget -O OpenSSL_1_1_0.zip https://github.com/openssl/openssl/archive/OpenSSL_1_1_0.zip
     unzip OpenSSL_1_1_0.zip
-    cd openssl-OpenSSL_1_1_0
-    ./config --prefix=${DEPS_PREFIX} --openssldir=${DEPS_PREFIX}
-    make -j5
+    pushd openssl-OpenSSL_1_1_0
+    ./config --prefix="$DEPS_PREFIX" --openssldir="$DEPS_PREFIX"
+    make "-j$(nproc)"
     make install
-    rm -rf ${DEPS_PREFIX}/lib/libssl.so*
-    rm -rf ${DEPS_PREFIX}/lib/libcrypto.so*
-    cd -
+    rm -rf "$DEPS_PREFIX"/lib/libssl.so*
+    rm -rf "$DEPS_PREFIX"/lib/libcrypto.so*
+    popd
     touch openssl_succ
     echo "openssl done"
 fi
@@ -222,7 +232,7 @@ if [ -f "zk_succ" ]
 then
     echo "zk exist"
 else
-    wget $PACKAGE_MIRROR/apache-zookeeper-3.5.7.tar.gz
+    wget https://archive.apache.org/dist/zookeeper/zookeeper-3.5.7/apache-zookeeper-3.5.7.tar.gz
     tar -zxvf apache-zookeeper-3.5.7.tar.gz
     pushd apache-zookeeper-3.5.7/zookeeper-client/zookeeper-client-c && mkdir -p build
     cd build && cmake -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC ..  && make && make install
@@ -248,7 +258,7 @@ if [ -f "bison_succ" ]
 then
     echo "bison exist"
 else
-    wget $PACKAGE_MIRROR/bison-3.4.tar.gz
+    wget https://ftp.gnu.org/gnu/bison/bison-3.4.tar.gz
     tar zxf bison-3.4.tar.gz
     pushd bison-3.4
     ./configure --prefix="$DEPS_PREFIX"
@@ -261,11 +271,11 @@ if [ -f "flex_succ" ]
 then
     echo "flex exist"
 else
-    wget --no-check-certificate -O flex-2.6.4.tar.gz http://pkg.4paradigm.com:81/rtidb/dev/flex-2.6.4.tar.gz
+    wget https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz
     tar zxf flex-2.6.4.tar.gz
-    cd flex-2.6.4
-    ./autogen.sh && ./configure --prefix=${DEPS_PREFIX} && make install
-    cd -
+    pushd flex-2.6.4
+    ./autogen.sh && ./configure --prefix="$DEPS_PREFIX" && make -j"$(nproc)" install
+    popd
     touch flex_succ
 fi
 
@@ -273,73 +283,71 @@ if [ -f "benchmark_succ" ]
 then
     echo "benchmark exist"
 else
-    wget --no-check-certificate -O v1.5.0.tar.gz http://pkg.4paradigm.com:81/rtidb/dev/benchmark-v1.5.0.tar.gz
+    wget https://github.com/google/benchmark/archive/v1.5.0.tar.gz
     tar zxf v1.5.0.tar.gz
-    cd benchmark-1.5.0 && mkdir -p build
-    cd build && cmake -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} -DCMAKE_CXX_FLAGS=-fPIC -DBENCHMARK_ENABLE_GTEST_TESTS=OFF ..
-    make -j4 && make install
-    cd ${DEPS_SOURCE}
+    pushd benchmark-1.5.0
+    mkdir -p build
+    cd build
+    cmake -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC -DBENCHMARK_ENABLE_GTEST_TESTS=OFF ..
+    make -j"$(nproc)"
+    make install
+    popd
     touch benchmark_succ
 fi
 
-if [ -f "xz_succ" ]
-then
-    echo "zx exist"
-else
-    wget --no-check-certificate -O xz-5.2.4.tar.gz http://pkg.4paradigm.com/fesql/xz-5.2.4.tar.gz
-    tar -zxvf xz-5.2.4.tar.gz
-    cd xz-5.2.4 && ./configure --prefix=${DEPS_PREFIX} && make -j4 && make install
-    cd -
-    touch xz_succ
-fi
+# if [ -f "xz_succ" ]
+# then
+#     echo "zx exist"
+# else
+#     wget --no-check-certificate -O xz-5.2.4.tar.gz $PACKAGE_MIRROR/xz-5.2.4.tar.gz
+#     tar -zxvf xz-5.2.4.tar.gz
+#     cd xz-5.2.4 && ./configure --prefix=${DEPS_PREFIX} && make -j4 && make install
+#     cd -
+#     touch xz_succ
+# fi
 
 if [ -f "double-conversion_succ" ]
 then
     echo "double-conversion exist"
 else
-    if [ -f "v3.1.5.tar.gz" ]
-    then
-        echo "double-conversion pkg exist"
-    else
-        wget --no-check-certificate -O v3.1.5.tar.gz http://pkg.4paradigm.com:81/rtidb/dev/double-conversion-v3.1.5.tar.gz
-    fi
+    wget https://github.com/google/double-conversion/archive/v3.1.5.tar.gz
     tar -zxvf v3.1.5.tar.gz
-    cd double-conversion-3.1.5 && mkdir -p build
-    cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} -DCMAKE_CXX_FLAGS=-fPIC ..
-    make -j4 && make install
-    cd ${DEPS_SOURCE}
+    pushd double-conversion-3.1.5
+    mkdir -p build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC ..
+    make -j"$(nproc)"
+    make install
+    popd
     touch double-conversion_succ
 fi
 
-if [ -f "brotli_succ" ]
-then
-    echo "brotli exist"
-else
-    if [ -f "v1.0.7.tar.gz" ]
-    then
-        echo "brotli exist"
-    else
-        wget --no-check-certificate -O v1.0.7.tar.gz http://pkg.4paradigm.com:81/rtidb/dev/brotli-v1.0.7.tar.gz
-    fi
-    tar -zxvf v1.0.7.tar.gz
-    mkdir ./brotli-1.0.7/build/ && cd ./brotli-1.0.7/build/ && ../configure-cmake --prefix=${DEPS_PREFIX} && make && make install
-    cd -
-    touch brotli_succ
-fi
+# if [ -f "brotli_succ" ]
+# then
+#     echo "brotli exist"
+# else
+#     if [ -f "v1.0.7.tar.gz" ]
+#     then
+#         echo "brotli exist"
+#     else
+#         wget --no-check-certificate -O v1.0.7.tar.gz $PACKAGE_MIRROR/brotli-v1.0.7.tar.gz
+#     fi
+#     tar -zxvf v1.0.7.tar.gz
+#     mkdir ./brotli-1.0.7/build/ && cd ./brotli-1.0.7/build/ && ../configure-cmake --prefix=${DEPS_PREFIX} && make && make install
+#     cd -
+#     touch brotli_succ
+# fi
 
 if [ -f "lz4_succ" ]
 then
     echo " lz4 exist"
 else
-    if [ -f "lz4-1.7.5.tar.gz" ]
-    then
-        echo "lz4 tar exist"
-    else
-        wget --no-check-certificate -O lz4-1.7.5.tar.gz http://pkg.4paradigm.com/fesql/lz4-1.7.5.tar.gz
-    fi
+    wget https://github.com/lz4/lz4/archive/v1.7.5.tar.gz
     tar -zxvf lz4-1.7.5.tar.gz
-    cd lz4-1.7.5 && make -j4 && make install PREFIX=${DEPS_PREFIX}
-    cd ${DEPS_SOURCE}
+    pushd lz4-1.7.5
+    make -j"$(nproc)"
+    make install PREFIX="$DEPS_PREFIX"
+    popd
     touch lz4_succ
 fi
 
@@ -347,15 +355,12 @@ if [ -f "bzip2_succ" ]
 then
     echo "bzip2 installed"
 else
-    if [ -f "bzip2-1.0.8.tar.gz" ]
-    then
-        echo "bzip2-1.0.8.tar.gz  downloaded"
-    else
-        wget --no-check-certificate -O bzip2-1.0.8.tar.gz http://pkg.4paradigm.com/fesql/bzip2-1.0.8.tar.gz
-    fi
+    wget https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz
     tar -zxvf bzip2-1.0.8.tar.gz
-    cd bzip2-1.0.8 && make -j4 && make install PREFIX=${DEPS_PREFIX}
-    cd -
+    pushd bzip2-1.0.8
+    make -j"$(nproc)"
+    make install PREFIX="$DEPS_PREFIX"
+    popd
     touch bzip2_succ
 fi
 
@@ -363,15 +368,14 @@ if [ -f "swig_succ" ]
 then
     echo "swig exist"
 else
-    if [ -f "swig-4.0.1.tar.gz" ]
-    then
-        echo "swig exist"
-    else
-        wget --no-check-certificate -O swig-4.0.1.tar.gz http://pkg.4paradigm.com/fesql/swig-4.0.1.tar.gz
-    fi
+    wget https://github.com/swig/swig/archive/v4.0.1.tar.gz
     tar -zxvf swig-4.0.1.tar.gz
-    cd swig-4.0.1 && ./autogen.sh && ./configure --without-pcre --prefix=${DEPS_PREFIX} && make -j20 && make install
-    cd -
+    pushd swig-4.0.1
+    ./autogen.sh
+    ./configure --without-pcre --prefix="$DEPS_PREFIX"
+    make -j"$(nproc)"
+    make install
+    popd
     touch swig_succ
 fi
 
@@ -379,15 +383,14 @@ if [ -f "jemalloc_succ" ]
 then
     echo "jemalloc installed"
 else
-    if [ -f "jemalloc-5.2.1.tar.gz" ]
-    then
-        echo "jemalloc-5.2.1.tar.gz downloaded"
-    else
-        wget --no-check-certificate -O jemalloc-5.2.1.tar.gz http://pkg.4paradigm.com/fesql/jemalloc-5.2.1.tar.gz
-    fi
+    wget https://github.com/jemalloc/jemalloc/archive/5.2.1.tar.gz
     tar -zxvf jemalloc-5.2.1.tar.gz
-    cd jemalloc-5.2.1 && ./autogen.sh && ./configure --prefix=${DEPS_PREFIX} && make -j4 && make install
-    cd -
+    pushd jemalloc-5.2.1
+    ./autogen.sh
+    ./configure --prefix="$DEPS_PREFIX"
+    make -j"$(nproc)"
+    make install
+    popd
     touch jemalloc_succ
 fi
 
@@ -395,16 +398,15 @@ if [ -f "flatbuffer_succ" ]
 then
     echo "flatbuffer installed"
 else
-    if [ -f "flatbuffers-1.11.0.tar.gz" ]
-    then
-        echo "flatbuffers-1.11.0.tar.gz downloaded"
-    else
-        wget --no-check-certificate -O flatbuffers-1.11.0.tar.gz http://pkg.4paradigm.com/fesql/flatbuffers-1.11.0.tar.gz
-    fi
+    wget https://github.com/google/flatbuffers/archive/v1.11.0.tar.gz
     tar -zxvf flatbuffers-1.11.0.tar.gz
-    cd flatbuffers-1.11.0 && mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} -DCMAKE_CXX_FLAGS=-fPIC ..
-    make -j4 && make install
-    cd ${DEPS_SOURCE}
+    pushd flatbuffers-1.11.0
+    mkdir -p build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC ..
+    make -j"$(nproc)"
+    make install
+    popd
     touch flatbuffer_succ
 fi
 
@@ -412,15 +414,12 @@ if [ -f "zstd_succ" ]
 then
     echo "zstd installed"
 else
-    if [ -f "zstd-1.4.4.tar.gz" ]
-    then
-        echo "zstd-1.4.4.tar.gz  downloaded"
-    else
-        wget --no-check-certificate -O zstd-1.4.4.tar.gz http://pkg.4paradigm.com/fesql/zstd-1.4.4.tar.gz
-    fi
+    wget https://github.com/facebook/zstd/releases/download/v1.4.4/zstd-1.4.4.tar.gz
     tar -zxvf zstd-1.4.4.tar.gz
-    cd zstd-1.4.4 && make -j4 && make install PREFIX=${DEPS_PREFIX}
-    cd ${DEPS_SOURCE}
+    pushd zstd-1.4.4
+    make -j"$(nproc)"
+    make install PREFIX="$DEPS_PREFIX"
+    popd
     touch zstd_succ
 fi
 
@@ -428,16 +427,14 @@ if [ -f "yaml_succ" ]
 then
     echo "yaml-cpp installed"
 else
-    if [ -f "yaml-cpp-0.6.3.tar.gz" ]
-    then
-        echo "yaml-cpp-0.6.3.tar.gz downloaded"
-    else
-        wget --no-check-certificate -O yaml-cpp-0.6.3.tar.gz http://pkg.4paradigm.com:81/rtidb/dev/yaml-cpp-0.6.3.tar.gz
-    fi
+    wget $PACKAGE_MIRROR/yaml-cpp-0.6.3.tar.gz
     tar -zxvf yaml-cpp-0.6.3.tar.gz
-    cd yaml-cpp-yaml-cpp-0.6.3 && mkdir -p build && cd build
-    cmake -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} ..
-    make && make install
+    pushd yaml-cpp-yaml-cpp-0.6.3
+    mkdir -p build
+    cd build
+    cmake -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" ..
+    make -j"$(nproc)"
+    make install
     touch yaml_succ
 fi
 
@@ -445,11 +442,14 @@ if [ -f "sqlite_succ" ]
 then
     echo "sqlite installed"
 else
-    wget --no-check-certificate -O sqlite.zip http://pkg.4paradigm.com:81/rtidb/dev/sqlite-3.32.3.zip
-    unzip sqlite.zip
-    cd sqlite && mkdir -p build && cd build
-    ../configure --prefix=${DEPS_PREFIX}
-    make && make install
+    wget https://github.com/sqlite/sqlite/archive/version-3.32.3.zip
+    unzip sqlite-*.zip
+    pushd sqlite-3.32.3
+    mkdir -p build
+    cd build
+    ../configure --prefix="$DEPS_PREFIX"
+    make -j"$(nproc)" && make install
+    popd
     touch sqlite_succ
 fi
 
@@ -457,15 +457,14 @@ if [ -f "llvm_succ" ]
 then
     echo "llvm_exist"
 else
-    if [ ! -d "llvm-9.0.0.src" ]
-    then
-        wget --no-check-certificate -O llvm-9.0.0.src.tar.xz http://pkg.4paradigm.com/fesql/llvm-9.0.0.src.tar.xz
-        tar xf llvm-9.0.0.src.tar.xz
-    fi
-    cd llvm-9.0.0.src && mkdir -p build
-    cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} -DCMAKE_CXX_FLAGS=-fPIC ..
-    make -j8 && make install
-    cd ${DEPS_SOURCE}
+    wget $PACKAGE_MIRROR/llvm-9.0.0.src.tar.xz
+    tar xf llvm-9.0.0.src.tar.xz
+    pushd llvm-9.0.0.src
+    mkdir -p build && cd build
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC ..
+    make "-j$(nproc)"
+    make install
+    popd
     touch llvm_succ
 fi
 
@@ -473,15 +472,12 @@ if [ -f "boost_succ" ]
 then
     echo "boost exist"
 else
-    if [ -f "boost_1_69_0.tar.gz" ]
-    then
-        echo "boost exist"
-    else
-        wget --no-check-certificate -O boost_1_69_0.tar.gz http://pkg.4paradigm.com/fesql/boost_1_69_0.tar.gz
-    fi
+    wget $PACKAGE_MIRROR/boost_1_69_0.tar.gz
     tar -zxvf boost_1_69_0.tar.gz
-    cd boost_1_69_0 && ./bootstrap.sh && ./b2 link=static cxxflags=-fPIC cflags=-fPIC release install --prefix=${DEPS_PREFIX}
-    cd -
+    pushd boost_1_69_0
+    ./bootstrap.sh
+    ./b2 link=static cxxflags=-fPIC cflags=-fPIC release install --prefix="$DEPS_PREFIX"
+    popd
     touch boost_succ
 fi
 
@@ -489,15 +485,13 @@ if [ -f "thrift_succ" ]
 then
     echo "thrift installed"
 else
-    if [ -f "thrift-0.13.0.tar.gz" ]
-    then
-        echo "thrift-0.13.0.tar.gz  downloaded"
-    else
-        wget --no-check-certificate -O thrift-0.13.0.tar.gz http://pkg.4paradigm.com:81/rtidb/dev/thrift-0.13.0.tar.gz
-    fi
+    wget $PACKAGE_MIRROR/thrift-0.13.0.tar.gz
     tar -zxvf thrift-0.13.0.tar.gz
-    cd thrift-0.13.0 && ./configure --enable-shared=no --enable-tests=no --with-python=no --with-nodejs=no --prefix=${DEPS_PREFIX} --with-boost=${DEPS_PREFIX} && make -j4 && make install
-    cd ${DEPS_SOURCE}
+    pushd thrift-0.13.0
+    ./configure --enable-shared=no --enable-tests=no --with-python=no --with-nodejs=no --prefix="$DEPS_PREFIX" --with-boost="$DEPS_PREFIX"
+    make -j"$(nproc)"
+    make install
+    popd
     touch thrift_succ
 fi
 
