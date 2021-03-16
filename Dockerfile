@@ -20,8 +20,27 @@ RUN rm -r /etc/yum.repos.d/*
 COPY --chown=root:root etc/yum.repos.d/CentOs-Base.repo /etc/yum.repos.d/
 
 RUN yum update -y && \
-    yum install -y autoconf automake unzip bc expect libtool && \
+    yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 && \
     yum clean all
+
+ADD ./install_deps.sh /depends/
+RUN cd /depends && source /opt/rh/devtoolset-7/enable && bash install_deps.sh
+
+ADD ./install_doxygen.sh /depends/
+RUN /depends/install_doxygen.sh
+
+ADD ./install_gperftools.sh /depends/
+RUN cd /depends && source /opt/rh/devtoolset-7/enable && bash /depends/install_gperftools.sh
+
+RUN wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.rpm && rpm -i scala-2.12.8.rpm && rm scala-2.12.8.rpm
+# RUN yum install -y nodejs npm
+
+ADD ./install_asan_centos6.sh /depends/
+RUN cd /depends && bash /depends/install_asan_centos6.sh
+
+# Remove dynamic library files for static link
+RUN find /depends/thirdparty/lib/ -name "lib*so*" | grep -v "libRemarks" | grep -v "libLTO" | xargs rm
+RUN find /depends/thirdparty/lib64/ -name "lib*so*" | grep -v "libRemarks" | grep -v "libLTO" | xargs rm
 
 ENTRYPOINT [ "/bin/bash" ]
 
