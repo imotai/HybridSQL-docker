@@ -26,7 +26,7 @@ RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
          -i.bak \
          /etc/yum.repos.d/CentOS-SCLo-*.repo
 
-RUN yum install -y devtoolset-7 && yum clean all
+RUN yum install -y devtoolset-7 sclo-git212 wget && yum clean all
 
 FROM base
 

@@ -1,46 +1,60 @@
 #!/bin/bash
 
+# Copyright 2021 4Paradigm
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 set -eE
 
-########################################
-# download & build depend software
-# mac can't support source compile for the followings:
-# 1. zookeeper_client_c
-# 2. rocksdb
-########################################
-STAGE="DEBUG"
-WORK_DIR=`pwd`
-DEPS_SOURCE=`pwd`/thirdsrc
-DEPS_PREFIX=`pwd`/thirdparty
+DEPS_SOURCE=$(pwd)/thirdsrc
+DEPS_PREFIX=$(pwd)/thirdparty
 DEPS_CONFIG="--prefix=${DEPS_PREFIX} --disable-shared --with-pic"
-mkdir -p $DEPS_PREFIX/lib $DEPS_PREFIX/include
+PACKAGE_MIRROR=https://github.com/imotai/packages/raw/main/
+
 export CXXFLAGS=" -O3 -fPIC"
 export CFLAGS=" -O3 -fPIC"
-export PATH=${DEPS_PREFIX}/bin:$PATH
-mkdir -p ${DEPS_SOURCE} ${DEPS_PREFIX}
-cd ${DEPS_SOURCE}
 
-echo "install gtest ...."
-# TODO: Remove the files in install directories
-rm -rf ${DEPS_PREFIX}/include/gtest/
-rm -rf ${DEPS_PREFIX}/lib/libgtest*
-wget http://pkg.4paradigm.com:81/rtidb/dev/googletest-release-1.10.0.tar.gz
-tar xzvf googletest-release-1.10.0.tar.gz
-GTEST_DIR=$DEPS_SOURCE/googletest-release-1.10.0/
-cd googletest-release-1.10.0
-cmake -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} -DCMAKE_CXX_FLAGS=-fPIC
-make -j2
-make install
-touch gtest_succ
-echo "install gtest done"
+mkdir -p "$DEPS_PREFIX/lib" "$DEPS_PREFIX/include" "$DEPS_SOURCE"
+export PATH=${DEPS_PREFIX}/bin:$PATH
+
+if ! command -v nproc ; then
+    alias nproc='sysctl -n hw.logicalcpu'
+fi
+
+pushd "$DEPS_SOURCE"
+
+if [ ! -f gtest_succ ]; then
+    echo "installing gtest ...."
+    wget $PACKAGE_MIRROR/googletest-release-1.10.0.tar.gz
+    tar xzvf googletest-release-1.10.0.tar.gz
+
+    pushd googletest-release-1.10.0
+    cmake -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC
+    make "-j$(nproc)"
+    make install
+    popd
+
+    touch gtest_succ
+    echo "install gtest done"
+fi
 
 if [ -f "zlib_succ" ]
 then
     echo "zlib exist"
 else
-    echo "start install zlib..."
+    echo "installing zlib..."
     wget http://pkg.4paradigm.com/rtidb/dev/zlib-1.2.11.tar.gz
-    tar zxf zlib-1.2.11.tar.gz 
+    tar zxf zlib-1.2.11.tar.gz
     cd zlib-1.2.11
     sed -i '/CFLAGS="${CFLAGS--O3}"/c\  CFLAGS="${CFLAGS--O3} -fPIC"' configure
     ./configure --static --prefix=${DEPS_PREFIX}
@@ -56,15 +70,17 @@ then
     echo "protobuf exist"
 else
     echo "start install protobuf ..."
-    wget http://pkg.4paradigm.com/rtidb/dev/protobuf-2.6.1.tar.gz
+    wget $PACKAGE_MIRROR/protobuf-2.6.1.tar.gz
     tar zxf protobuf-2.6.1.tar.gz
-    cd protobuf-2.6.1
+
+    pushd protobuf-2.6.1
     export CPPFLAGS=-I${DEPS_PREFIX}/include
     export LDFLAGS=-L${DEPS_PREFIX}/lib
-    ./configure ${DEPS_CONFIG}
-    make -j4
+    ./configure "$DEPS_CONFIG"
+    make -j"$(nproc)"
     make install
-    cd -
+    popd
+
     touch protobuf_succ
     echo "install protobuf done"
 fi
@@ -74,13 +90,14 @@ then
     echo "snappy exist"
 else
     echo "start install snappy ..."
-    wget http://pkg.4paradigm.com/rtidb/dev/snappy-1.1.1.tar.gz
+    wget $PACKAGE_MIRROR/snappy-1.1.1.tar.gz
     tar zxf snappy-1.1.1.tar.gz
-    cd snappy-1.1.1
-    ./configure ${DEPS_CONFIG}
-    make -j4
+    pushd snappy-1.1.1
+    ./configure "$DEPS_CONFIG"
+    make "-j$(nproc)"
     make install
-    cd -
+    popd
+
     touch snappy_succ
     echo "install snappy done"
 fi
@@ -89,27 +106,30 @@ if [ -f "gflags_succ" ]
 then
     echo "gflags-2.1.1.tar.gz exist"
 else
-    wget http://pkg.4paradigm.com/rtidb/dev/gflags-2.2.0.tar.gz 
+    wget $PACKAGE_MIRROR/gflags-2.2.0.tar.gz
     tar zxf gflags-2.2.0.tar.gz
-    cd gflags-2.2.0
-    cmake -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} -DGFLAGS_NAMESPACE=google -DCMAKE_CXX_FLAGS=-fPIC 
-    make -j4
+    pushd gflags-2.2.0
+    cmake -DCMAKE_INSTALL_PREFIX="${DEPS_PREFIX}" -DGFLAGS_NAMESPACE=google -DCMAKE_CXX_FLAGS=-fPIC
+    make "-j$(nproc)"
     make install
-    cd -
+    popd
+
     touch gflags_succ
+    echo "install gflags done"
 fi
 
-if [ -f "unwind_succ" ] 
+if [ -f "unwind_succ" ]
 then
     echo "unwind_exist"
 else
-    wget http://pkg.4paradigm.com/rtidb/dev/libunwind-1.1.tar.gz  
+    wget $PACKAGE_MIRROR/libunwind-1.1.tar.gz
     tar -zxvf libunwind-1.1.tar.gz
-    cd libunwind-1.1
+    pushd libunwind-1.1
     autoreconf -i
-    ./configure --prefix=${DEPS_PREFIX}
-    make -j4 && make install 
-    cd -
+    ./configure --prefix="$DEPS_PREFIX"
+    make -j4 && make install
+    popd
+
     touch unwind_succ
 fi
 
@@ -117,23 +137,23 @@ if [ -f "gperf_tool" ]
 then
     echo "gperf_tool exist"
 else
-    wget http://pkg.4paradigm.com/rtidb/dev/gperftools-2.5.tar.gz
+    wget $PACKAGE_MIRROR/gperftools-2.5.tar.gz
     tar -zxvf gperftools-2.5.tar.gz
-    cd gperftools-2.5
-    ./configure --enable-cpu-profiler --enable-heap-checker --enable-heap-profiler  --enable-static --prefix=${DEPS_PREFIX}
-    make -j4
+    pushd gperftools-2.5
+    ./configure --enable-cpu-profiler --enable-heap-checker --enable-heap-profiler  --enable-static --prefix="$DEPS_PREFIX"
+    make "-j$(nproc)"
     make install
-    cd -
+    popd
     touch gperf_tool
 fi
 
 if [ -f "rapjson_succ" ]
-then 
+then
     echo "rapjson exist"
 else
-    wget http://pkg.4paradigm.com/rtidb/dev/rapidjson.1.1.0.tar.gz
+    wget $PACKAGE_MIRROR/rapidjson.1.1.0.tar.gz
     tar -zxvf rapidjson.1.1.0.tar.gz
-    cp -rf rapidjson-1.1.0/include/rapidjson ${DEPS_PREFIX}/include
+    cp -rf rapidjson-1.1.0/include/rapidjson "$DEPS_PREFIX/include"
     touch rapjson_succ
 fi
 
@@ -141,14 +161,14 @@ if [ -f "leveldb_succ" ]
 then
     echo "leveldb exist"
 else
-    wget http://pkg.4paradigm.com/rtidb/dev/leveldb.tar.gz
+    wget $PACKAGE_MIRROR/leveldb.tar.gz
     tar -zxvf leveldb.tar.gz
-    cd leveldb
+    pushd leveldb
     sed -i 's/^OPT ?= -O2 -DNDEBUG/OPT ?= -O2 -DNDEBUG -fPIC/' Makefile
-    make -j8
-    cp -rf include/* ${DEPS_PREFIX}/include
-    cp out-static/libleveldb.a ${DEPS_PREFIX}/lib
-    cd -
+    make "-j$(nproc)"
+    cp -rf include/* "$DEPS_PREFIX/include"
+    cp out-static/libleveldb.a "$DEPS_PREFIX/lib"
+    popd
     touch leveldb_succ
 fi
 
@@ -170,14 +190,14 @@ else
 fi
 
 if [ -f "glog_succ" ]
-then 
+then
     echo "glog exist"
 else
-    wget --no-check-certificate -O glogs-v0.4.tar.gz http://pkg.4paradigm.com:81/rtidb/dev/glogs-v0.4.tar.gz
-    tar zxf glogs-v0.4.tar.gz
-    cd glog-0.4.0
-    ./autogen.sh && CXXFLAGS=-fPIC ./configure --prefix=${DEPS_PREFIX} && make install
-    cd -
+    wget $PACKAGE_MIRROR/glogs-v0.4.0.tar.gz
+    tar zxf glogs-v0.4.0.tar.gz
+    pushd glog-0.4.0
+    ./autogen.sh && CXXFLAGS=-fPIC ./configure --prefix="$DEPS_PREFIX" && make install
+    popd
     touch glog_succ
 fi
 
@@ -185,20 +205,15 @@ if [ -f "brpc_succ" ]
 then
     echo "brpc exist"
 else
-    if [ -d "incubator-brpc" ]
-    then
-        rm -rf incubator-brpc
-    fi
-    wget http://pkg.4paradigm.com/fesql/incubator-brpc.tar.gz
+    wget $PACKAGE_MIRROR/incubator-brpc.tar.gz
     tar -zxvf incubator-brpc.tar.gz
-    BRPC_DIR=$DEPS_SOURCE/incubator-brpc
-    cd incubator-brpc
-    sh config_brpc.sh --with-glog --headers=${DEPS_PREFIX}/include --libs=${DEPS_PREFIX}/lib
-    make -j5 libbrpc.a
-    make output/include
-    cp -rf output/include/* ${DEPS_PREFIX}/include
-    cp libbrpc.a ${DEPS_PREFIX}/lib
-    cd -
+    pushd incubator-brpc
+    sh config_brpc.sh --with-glog --headers="$DEPS_PREFIX/include" --libs="$DEPS_PREFIX/lib"
+    make "-j$(nproc)" libbrpc.a output/include
+    cp -rf output/include/* "$DEPS_PREFIX/include/"
+    cp libbrpc.a "$DEPS_PREFIX/lib"
+    popd
+
     touch brpc_succ
     echo "brpc done"
 fi
@@ -207,11 +222,11 @@ if [ -f "zk_succ" ]
 then
     echo "zk exist"
 else
-    wget http://pkg.4paradigm.com:81/rtidb/dev/apache-zookeeper-3.5.7.tar.gz
+    wget $PACKAGE_MIRROR/apache-zookeeper-3.5.7.tar.gz
     tar -zxvf apache-zookeeper-3.5.7.tar.gz
-    cd apache-zookeeper-3.5.7/zookeeper-client/zookeeper-client-c && mkdir -p build
-    cd build && cmake -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} -DCMAKE_CXX_FLAGS=-fPIC ..  && make && make install
-    cd ${DEPS_SOURCE}
+    pushd apache-zookeeper-3.5.7/zookeeper-client/zookeeper-client-c && mkdir -p build
+    cd build && cmake -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC ..  && make && make install
+    popd
     touch zk_succ
 fi
 
@@ -219,12 +234,13 @@ if [ -f "abseil_succ" ]
 then
     echo "abseil exist"
 else
-    wget --no-check-certificate -O 20190808.tar.gz http://pkg.4paradigm.com:81/rtidb/dev/abseil-cpp-20190808.tar.gz
-    tar zxf 20190808.tar.gz
-    cd abseil-cpp-20190808 && mkdir build 
-    cd build && cmake -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} -DCMAKE_CXX_FLAGS=-fPIC ..
-    make -j4 && make install
-    cd ${DEPS_SOURCE}
+    wget $PACKAGE_MIRROR/abseil-cpp-20200923.3.tar.gz
+    tar zxf abseil-cpp-20200923.3.tar.gz
+    pushd abseil-cpp-20200923.3
+    mkdir -p build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC ..
+    make "-j$(nproc)" && make install
+    popd
     touch abseil_succ
 fi
 
@@ -232,11 +248,12 @@ if [ -f "bison_succ" ]
 then
     echo "bison exist"
 else
-    wget --no-check-certificate -O bison-3.4.tar.gz http://pkg.4paradigm.com:81/rtidb/dev/bison-3.4.tar.gz
+    wget $PACKAGE_MIRROR/bison-3.4.tar.gz
     tar zxf bison-3.4.tar.gz
-    cd bison-3.4
-    ./configure --prefix=${DEPS_PREFIX} && make install
-    cd -
+    pushd bison-3.4
+    ./configure --prefix="$DEPS_PREFIX"
+    make "-j$(nproc)" install
+    popd
     touch bison_succ
 fi
 
@@ -265,7 +282,7 @@ else
     touch benchmark_succ
 fi
 
-if [ -f "xz_succ" ] 
+if [ -f "xz_succ" ]
 then
     echo "zx exist"
 else
@@ -277,7 +294,7 @@ else
 fi
 
 if [ -f "double-conversion_succ" ]
-then 
+then
     echo "double-conversion exist"
 else
     if [ -f "v3.1.5.tar.gz" ]
@@ -294,7 +311,7 @@ else
     touch double-conversion_succ
 fi
 
-if [ -f "brotli_succ" ] 
+if [ -f "brotli_succ" ]
 then
     echo "brotli exist"
 else
@@ -320,7 +337,7 @@ else
     else
         wget --no-check-certificate -O lz4-1.7.5.tar.gz http://pkg.4paradigm.com/fesql/lz4-1.7.5.tar.gz
     fi
-    tar -zxvf lz4-1.7.5.tar.gz 
+    tar -zxvf lz4-1.7.5.tar.gz
     cd lz4-1.7.5 && make -j4 && make install PREFIX=${DEPS_PREFIX}
     cd ${DEPS_SOURCE}
     touch lz4_succ
@@ -336,7 +353,7 @@ else
     else
         wget --no-check-certificate -O bzip2-1.0.8.tar.gz http://pkg.4paradigm.com/fesql/bzip2-1.0.8.tar.gz
     fi
-    tar -zxvf bzip2-1.0.8.tar.gz 
+    tar -zxvf bzip2-1.0.8.tar.gz
     cd bzip2-1.0.8 && make -j4 && make install PREFIX=${DEPS_PREFIX}
     cd -
     touch bzip2_succ
@@ -370,7 +387,7 @@ else
     fi
     tar -zxvf jemalloc-5.2.1.tar.gz
     cd jemalloc-5.2.1 && ./autogen.sh && ./configure --prefix=${DEPS_PREFIX} && make -j4 && make install
-    cd - 
+    cd -
     touch jemalloc_succ
 fi
 
@@ -437,7 +454,7 @@ else
 fi
 
 if [ -f "llvm_succ" ]
-then 
+then
     echo "llvm_exist"
 else
     if [ ! -d "llvm-9.0.0.src" ]
@@ -446,13 +463,13 @@ else
         tar xf llvm-9.0.0.src.tar.xz
     fi
     cd llvm-9.0.0.src && mkdir -p build
-    cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} -DCMAKE_CXX_FLAGS=-fPIC .. 
+    cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} -DCMAKE_CXX_FLAGS=-fPIC ..
     make -j8 && make install
     cd ${DEPS_SOURCE}
     touch llvm_succ
 fi
 
-if [ -f "boost_succ" ] 
+if [ -f "boost_succ" ]
 then
     echo "boost exist"
 else
