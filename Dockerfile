@@ -29,6 +29,8 @@ RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
          -i.bak \
          /etc/yum.repos.d/CentOS-SCLo-*.repo
 
+RUN yum install -y devltoolset-7 && yum clean all
+
 FROM base
 
 RUN yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 && \
