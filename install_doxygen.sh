@@ -6,7 +6,6 @@ set -e
 DEPS_PREFIX=/depends/thirdparty
 export CXXFLAGS=" -O3 -fPIC"
 export CFLAGS=" -O3 -fPIC"
-source /opt/rh/python27/enable
 export PATH=${DEPS_PREFIX}/bin:$PATH:/opt/rh/devtoolset-7/root/usr/bin/
 
 wget -O doxygen-1.8.19.src.tar.gz  http://pkg.4paradigm.com:81/rtidb/dev/doxygen-1.8.19.src.tar.gz

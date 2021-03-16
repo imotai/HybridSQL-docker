@@ -39,9 +39,6 @@ RUN cd /depends && source /opt/rh/devtoolset-7/enable && bash install_deps.sh
 COPY --chown=root:root ./install_doxygen.sh /depends/
 RUN /depends/install_doxygen.sh
 
-COPY --chown=root:root ./install_gperftools.sh /depends/
-RUN cd /depends && source /opt/rh/devtoolset-7/enable && bash /depends/install_gperftools.sh
-
 RUN wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.rpm && rpm -i scala-2.12.8.rpm && rm scala-2.12.8.rpm
 # RUN yum install -y nodejs npm
 

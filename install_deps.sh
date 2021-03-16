@@ -34,12 +34,10 @@ fi
 pushd "$DEPS_SOURCE"
 
 if ! command -v cmake ; then
-    wget https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7.tar.gz
+    wget https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7-Linux-x86_64.tar.gz
     tar xvzf cmake-3.*
-    pushd cmake-3.19.7
-    ./bootstrap --prefix=/usr/local
-    make -j"$(nproc)"
-    make install
+    pushd cmake-3.19.7-Linux-x86_64
+    find . -type f -exec install -D -m 755 {} /usr/local/{} \;
     popd
 fi
 
