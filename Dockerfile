@@ -18,15 +18,14 @@ LABEL org.opencontainers.image.source https://github.com/4paradigm/HybridSQL-doc
 
 # since centos 6 is dead, replace with a backup mirror
 RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-         -e 's|^#baseurl=http://mirror.centos.org/centos/|baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos-vault/centos/|g' \
+         -e 's|^#baseurl=http://mirror.centos.org/centos/|baseurl=http://vault.centos.org/centos/|g' \
          -i.bak \
          /etc/yum.repos.d/CentOS-*.repo
 
 RUN yum update -y && yum install -y centos-release-scl && yum clean all
 
-# snippet originally from https://mirrors.tuna.tsinghua.edu.cn/help/centos-vault/
 RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-         -e 's|^#\s*baseurl=http://mirror.centos.org/centos/|baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos-vault/centos/|g' \
+         -e 's|^#\s*baseurl=http://mirror.centos.org/centos/|baseurl=http://vault.centos.org/centos/|g' \
          -i.bak \
          /etc/yum.repos.d/CentOS-SCLo-*.repo
 
