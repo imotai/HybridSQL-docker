@@ -35,7 +35,7 @@ pushd "$DEPS_SOURCE"
 
 if ! command -v cmake ; then
     wget -q https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7-Linux-x86_64.tar.gz
-    tar xvz cmake-3.*
+    tar xzf cmake-3.*
     pushd cmake-3.19.7-Linux-x86_64
     find . -type f -exec install -D -m 755 {} /usr/local/{} \; > /dev/null
     popd
