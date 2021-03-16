@@ -85,7 +85,7 @@ else
     pushd protobuf-2.6.1
     export CPPFLAGS=-I${DEPS_PREFIX}/include
     export LDFLAGS=-L${DEPS_PREFIX}/lib
-    ./configure "$DEPS_CONFIG"
+    ./configure $DEPS_CONFIG
     make -j"$(nproc)"
     make install
     popd
@@ -102,7 +102,7 @@ else
     wget -q $PACKAGE_MIRROR/snappy-1.1.1.tar.gz
     tar zxf snappy-1.1.1.tar.gz
     pushd snappy-1.1.1
-    ./configure "$DEPS_CONFIG"
+    ./configure $DEPS_CONFIG
     make "-j$(nproc)"
     make install
     popd
