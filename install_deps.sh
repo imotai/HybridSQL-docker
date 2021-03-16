@@ -204,8 +204,8 @@ then
     echo "glog exist"
 else
     echo "installing glog ..."
-    wget -q $PACKAGE_MIRROR/glog-v0.4.0.tar.gz
-    tar xzf glog-v0.4.0.tar.gz
+    wget -q $PACKAGE_MIRROR/glog-0.4.0.tar.gz
+    tar xzf glog-0.4.0.tar.gz
     pushd glog-0.4.0
     ./autogen.sh && CXXFLAGS=-fPIC ./configure --prefix="$DEPS_PREFIX" && make install
     popd
