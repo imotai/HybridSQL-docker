@@ -35,7 +35,7 @@ fi
 pushd "$DEPS_SOURCE"
 
 if ! command -v cmake ; then
-    wget -q https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7-Linux-x86_64.tar.gz
+    wget https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7-Linux-x86_64.tar.gz
     tar xzf cmake-3.*
     pushd cmake-3.19.7-Linux-x86_64
     find . -type f -exec install -D -m 755 {} /usr/local/{} \; > /dev/null
@@ -45,7 +45,7 @@ fi
 
 if [ ! -f gtest_succ ]; then
     echo "installing gtest ...."
-    wget -q $PACKAGE_MIRROR/googletest-release-1.10.0.tar.gz
+    wget $PACKAGE_MIRROR/googletest-release-1.10.0.tar.gz
     tar xzf googletest-release-1.10.0.tar.gz
 
     pushd googletest-release-1.10.0
@@ -63,7 +63,7 @@ then
     echo "zlib exist"
 else
     echo "installing zlib..."
-    wget -q -O zlib-1.2.11.tar.gz https://github.com/madler/zlib/archive/v1.2.11.tar.gz
+    wget -O zlib-1.2.11.tar.gz https://github.com/madler/zlib/archive/v1.2.11.tar.gz
     tar xzf zlib-1.2.11.tar.gz
     pushd zlib-1.2.11
     sed -i '/CFLAGS="${CFLAGS--O3}"/c\  CFLAGS="${CFLAGS--O3} -fPIC"' configure
@@ -80,7 +80,7 @@ then
     echo "protobuf exist"
 else
     echo "start install protobuf ..."
-    wget -q $PACKAGE_MIRROR/protobuf-2.6.1.tar.gz
+    wget $PACKAGE_MIRROR/protobuf-2.6.1.tar.gz
     tar zxf protobuf-2.6.1.tar.gz
 
     pushd protobuf-2.6.1
@@ -100,7 +100,7 @@ then
     echo "snappy exist"
 else
     echo "start install snappy ..."
-    wget -q $PACKAGE_MIRROR/snappy-1.1.1.tar.gz
+    wget $PACKAGE_MIRROR/snappy-1.1.1.tar.gz
     tar zxf snappy-1.1.1.tar.gz
     pushd snappy-1.1.1
     ./configure $DEPS_CONFIG
@@ -116,7 +116,7 @@ if [ -f "gflags_succ" ]
 then
     echo "gflags-2.1.1.tar.gz exist"
 else
-    wget -q $PACKAGE_MIRROR/gflags-2.2.0.tar.gz
+    wget $PACKAGE_MIRROR/gflags-2.2.0.tar.gz
     tar zxf gflags-2.2.0.tar.gz
     pushd gflags-2.2.0
     cmake -DCMAKE_INSTALL_PREFIX="${DEPS_PREFIX}" -DGFLAGS_NAMESPACE=google -DCMAKE_CXX_FLAGS=-fPIC
@@ -132,7 +132,7 @@ if [ -f "unwind_succ" ]
 then
     echo "unwind_exist"
 else
-    wget -q $PACKAGE_MIRROR/libunwind-1.1.tar.gz
+    wget $PACKAGE_MIRROR/libunwind-1.1.tar.gz
     tar zxf libunwind-1.1.tar.gz
     pushd libunwind-1.1
     autoreconf -i
@@ -147,7 +147,7 @@ if [ -f "gperf_tool" ]
 then
     echo "gperf_tool exist"
 else
-    wget -q $PACKAGE_MIRROR/gperftools-2.5.tar.gz
+    wget $PACKAGE_MIRROR/gperftools-2.5.tar.gz
     tar zxf gperftools-2.5.tar.gz
     pushd gperftools-2.5
     ./configure --enable-cpu-profiler --enable-heap-checker --enable-heap-profiler  --enable-static --prefix="$DEPS_PREFIX"
@@ -171,7 +171,7 @@ if [ -f "leveldb_succ" ]
 then
     echo "leveldb exist"
 else
-    wget -q $PACKAGE_MIRROR/leveldb.tar.gz
+    wget $PACKAGE_MIRROR/leveldb.tar.gz
     tar zxf leveldb.tar.gz
     pushd leveldb
     sed -i 's/^OPT ?= -O2 -DNDEBUG/OPT ?= -O2 -DNDEBUG -fPIC/' Makefile
@@ -186,7 +186,7 @@ if [ -f "openssl_succ" ]
 then
     echo "openssl exist"
 else
-    wget -q -O OpenSSL_1_1_0.zip https://github.com/openssl/openssl/archive/OpenSSL_1_1_0.zip
+    wget -O OpenSSL_1_1_0.zip https://github.com/openssl/openssl/archive/OpenSSL_1_1_0.zip
     unzip OpenSSL_1_1_0.zip
     pushd openssl-OpenSSL_1_1_0
     ./config --prefix="$DEPS_PREFIX" --openssldir="$DEPS_PREFIX"
@@ -204,7 +204,7 @@ then
     echo "glog exist"
 else
     echo "installing glog ..."
-    wget -q $PACKAGE_MIRROR/glog-0.4.0.tar.gz
+    wget $PACKAGE_MIRROR/glog-0.4.0.tar.gz
     tar xzf glog-0.4.0.tar.gz
     pushd glog-0.4.0
     ./autogen.sh && CXXFLAGS=-fPIC ./configure --prefix="$DEPS_PREFIX" && make install
@@ -217,7 +217,7 @@ if [ -f "brpc_succ" ]
 then
     echo "brpc exist"
 else
-    wget -q $PACKAGE_MIRROR/incubator-brpc.tar.gz
+    wget $PACKAGE_MIRROR/incubator-brpc.tar.gz
     tar zxf incubator-brpc.tar.gz
     pushd incubator-brpc
     sh config_brpc.sh --with-glog --headers="$DEPS_PREFIX/include" --libs="$DEPS_PREFIX/lib"
@@ -234,7 +234,7 @@ if [ -f "zk_succ" ]
 then
     echo "zk exist"
 else
-    wget -q https://archive.apache.org/dist/zookeeper/zookeeper-3.5.7/apache-zookeeper-3.5.7.tar.gz
+    wget https://archive.apache.org/dist/zookeeper/zookeeper-3.5.7/apache-zookeeper-3.5.7.tar.gz
     tar -zxf apache-zookeeper-3.5.7.tar.gz
     pushd apache-zookeeper-3.5.7/zookeeper-client/zookeeper-client-c && mkdir -p build
     cd build && cmake -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC ..  && make && make install
@@ -246,7 +246,7 @@ if [ -f "abseil_succ" ]
 then
     echo "abseil exist"
 else
-    wget -q $PACKAGE_MIRROR/abseil-cpp-20200923.3.tar.gz
+    wget $PACKAGE_MIRROR/abseil-cpp-20200923.3.tar.gz
     tar zxf abseil-cpp-20200923.3.tar.gz
     pushd abseil-cpp-20200923.3
     mkdir -p build && cd build
@@ -260,7 +260,7 @@ if [ -f "bison_succ" ]
 then
     echo "bison exist"
 else
-    wget -q https://ftp.gnu.org/gnu/bison/bison-3.4.tar.gz
+    wget https://ftp.gnu.org/gnu/bison/bison-3.4.tar.gz
     tar zxf bison-3.4.tar.gz
     pushd bison-3.4
     ./configure --prefix="$DEPS_PREFIX"
@@ -273,7 +273,7 @@ if [ -f "flex_succ" ]
 then
     echo "flex exist"
 else
-    wget -q https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz
+    wget https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz
     tar zxf flex-2.6.4.tar.gz
     pushd flex-2.6.4
     ./autogen.sh && ./configure --prefix="$DEPS_PREFIX" && make -j"$(nproc)" install
@@ -285,7 +285,7 @@ if [ -f "benchmark_succ" ]
 then
     echo "benchmark exist"
 else
-    wget -q https://github.com/google/benchmark/archive/v1.5.0.tar.gz
+    wget https://github.com/google/benchmark/archive/v1.5.0.tar.gz
     tar zxf v1.5.0.tar.gz
     pushd benchmark-1.5.0
     mkdir -p build
@@ -312,7 +312,7 @@ if [ -f "double-conversion_succ" ]
 then
     echo "double-conversion exist"
 else
-    wget -q https://github.com/google/double-conversion/archive/v3.1.5.tar.gz
+    wget https://github.com/google/double-conversion/archive/v3.1.5.tar.gz
     tar -zxf v3.1.5.tar.gz
     pushd double-conversion-3.1.5
     mkdir -p build
@@ -344,7 +344,7 @@ if [ -f "lz4_succ" ]
 then
     echo " lz4 exist"
 else
-    wget -q https://github.com/lz4/lz4/archive/v1.7.5.tar.gz
+    wget https://github.com/lz4/lz4/archive/v1.7.5.tar.gz
     tar -zxf lz4-1.7.5.tar.gz
     pushd lz4-1.7.5
     make -j"$(nproc)"
@@ -357,7 +357,7 @@ if [ -f "bzip2_succ" ]
 then
     echo "bzip2 installed"
 else
-    wget -q https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz
+    wget https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz
     tar -zxf bzip2-1.0.8.tar.gz
     pushd bzip2-1.0.8
     make -j"$(nproc)"
@@ -370,7 +370,7 @@ if [ -f "swig_succ" ]
 then
     echo "swig exist"
 else
-    wget -q https://github.com/swig/swig/archive/v4.0.1.tar.gz
+    wget https://github.com/swig/swig/archive/v4.0.1.tar.gz
     tar -zxf swig-4.0.1.tar.gz
     pushd swig-4.0.1
     ./autogen.sh
@@ -385,7 +385,7 @@ if [ -f "jemalloc_succ" ]
 then
     echo "jemalloc installed"
 else
-    wget -q https://github.com/jemalloc/jemalloc/archive/5.2.1.tar.gz
+    wget https://github.com/jemalloc/jemalloc/archive/5.2.1.tar.gz
     tar -zxf jemalloc-5.2.1.tar.gz
     pushd jemalloc-5.2.1
     ./autogen.sh
@@ -400,7 +400,7 @@ if [ -f "flatbuffer_succ" ]
 then
     echo "flatbuffer installed"
 else
-    wget -q https://github.com/google/flatbuffers/archive/v1.11.0.tar.gz
+    wget https://github.com/google/flatbuffers/archive/v1.11.0.tar.gz
     tar -zxf flatbuffers-1.11.0.tar.gz
     pushd flatbuffers-1.11.0
     mkdir -p build
@@ -416,7 +416,7 @@ if [ -f "zstd_succ" ]
 then
     echo "zstd installed"
 else
-    wget -q https://github.com/facebook/zstd/releases/download/v1.4.4/zstd-1.4.4.tar.gz
+    wget https://github.com/facebook/zstd/releases/download/v1.4.4/zstd-1.4.4.tar.gz
     tar -zxf zstd-1.4.4.tar.gz
     pushd zstd-1.4.4
     make -j"$(nproc)"
@@ -429,7 +429,7 @@ if [ -f "yaml_succ" ]
 then
     echo "yaml-cpp installed"
 else
-    wget -q $PACKAGE_MIRROR/yaml-cpp-0.6.3.tar.gz
+    wget $PACKAGE_MIRROR/yaml-cpp-0.6.3.tar.gz
     tar -zxf yaml-cpp-0.6.3.tar.gz
     pushd yaml-cpp-yaml-cpp-0.6.3
     mkdir -p build
@@ -444,7 +444,7 @@ if [ -f "sqlite_succ" ]
 then
     echo "sqlite installed"
 else
-    wget -q https://github.com/sqlite/sqlite/archive/version-3.32.3.zip
+    wget https://github.com/sqlite/sqlite/archive/version-3.32.3.zip
     unzip sqlite-*.zip
     pushd sqlite-3.32.3
     mkdir -p build
@@ -459,7 +459,7 @@ if [ -f "llvm_succ" ]
 then
     echo "llvm_exist"
 else
-    wget -q $PACKAGE_MIRROR/llvm-9.0.0.src.tar.xz
+    wget $PACKAGE_MIRROR/llvm-9.0.0.src.tar.xz
     tar xf llvm-9.0.0.src.tar.xz
     pushd llvm-9.0.0.src
     mkdir -p build && cd build
@@ -474,7 +474,7 @@ if [ -f "boost_succ" ]
 then
     echo "boost exist"
 else
-    wget -q $PACKAGE_MIRROR/boost_1_69_0.tar.gz
+    wget $PACKAGE_MIRROR/boost_1_69_0.tar.gz
     tar -zxf boost_1_69_0.tar.gz
     pushd boost_1_69_0
     ./bootstrap.sh
@@ -487,7 +487,7 @@ if [ -f "thrift_succ" ]
 then
     echo "thrift installed"
 else
-    wget -q $PACKAGE_MIRROR/thrift-0.13.0.tar.gz
+    wget $PACKAGE_MIRROR/thrift-0.13.0.tar.gz
     tar -zxf thrift-0.13.0.tar.gz
     pushd thrift-0.13.0
     ./configure --enable-shared=no --enable-tests=no --with-python=no --with-nodejs=no --prefix="$DEPS_PREFIX" --with-boost="$DEPS_PREFIX"
@@ -497,11 +497,11 @@ else
     touch thrift_succ
 fi
 
-wget -q http://ftp.iij.ad.jp/pub/linux/centos-vault/centos/6.9/sclo/x86_64/rh/devtoolset-7/libasan4-7.2.1-1.el6.x86_64.rpm
-wget -q http://ftp.iij.ad.jp/pub/linux/centos-vault/centos/6.9/sclo/x86_64/rh/devtoolset-7/devtoolset-7-libasan-devel-7.2.1-1.el6.x86_64.rpm
+wget http://ftp.iij.ad.jp/pub/linux/centos-vault/centos/6.9/sclo/x86_64/rh/devtoolset-7/libasan4-7.2.1-1.el6.x86_64.rpm
+wget http://ftp.iij.ad.jp/pub/linux/centos-vault/centos/6.9/sclo/x86_64/rh/devtoolset-7/devtoolset-7-libasan-devel-7.2.1-1.el6.x86_64.rpm
 yum install -y devtoolset-7-libasan-devel-7.2.1-1.el6.x86_64.rpm libasan4-7.2.1-1.el6.x86_64.rpm
 
-wget -q -O doxygen-1.8.19.src.tar.gz  https://github.com/doxygen/doxygen/archive/Release_1_8_19.tar.gz
+wget -O doxygen-1.8.19.src.tar.gz  https://github.com/doxygen/doxygen/archive/Release_1_8_19.tar.gz
 
 tar xzf ./doxygen-1.8.19.src.tar.gz
 
