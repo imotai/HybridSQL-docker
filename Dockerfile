@@ -22,7 +22,7 @@ COPY --chown=root:root etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/
 RUN yum update -y && yum install -y centos-release-scl && yum clean all
 
 RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-         -e 's|^#\s*baseurl=http://mirror.centos.org/centos/6/|baseurl=http://vault.centos.org/6.10/|g' \
+         -e 's|^#\s*baseurl=http://mirror.centos.org/|baseurl=http://vault.centos.org/|g' \
          -i.bak \
          /etc/yum.repos.d/CentOS-SCLo-*.repo
 

@@ -18,7 +18,6 @@ export CXXFLAGS=" -O3 -fPIC"
 export CFLAGS=" -O3 -fPIC"
 export PATH=${DEPS_PREFIX}/bin:$PATH
 mkdir -p ${DEPS_SOURCE} ${DEPS_PREFIX}
-source /opt/rh/python27/enable
 cd ${DEPS_SOURCE}
 
 echo "install gtest ...."
@@ -483,29 +482,5 @@ else
     cd thrift-0.13.0 && ./configure --enable-shared=no --enable-tests=no --with-python=no --with-nodejs=no --prefix=${DEPS_PREFIX} --with-boost=${DEPS_PREFIX} && make -j4 && make install
     cd ${DEPS_SOURCE}
     touch thrift_succ
-fi
-
-if [ -f "arrow_succ" ]
-then
-    echo "arrow installed"
-else
-    if [ -f "apache-arrow-0.15.1.tar.gz" ]
-    then
-        echo "apache-arrow-0.15.1.tar.gz   downloaded"
-    else
-        wget --no-check-certificate -O apache-arrow-0.15.1.tar.gz http://pkg.4paradigm.com/fesql/apache-arrow-0.15.1.tar.gz
-    fi
-    tar -zxvf apache-arrow-0.15.1.tar.gz
-    export ARROW_BUILD_TOOLCHAIN=${DEPS_PREFIX}
-    export JEMALLOC_HOME=${DEPS_PREFIX}
-    cd apache-arrow-0.15.1/cpp && mkdir -p build && cd build
-    cmake  -DARROW_JEMALLOC=OFF -DARROW_MIMALLOC=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} -DARROW_CUDA=OFF -DARROW_FLIGHT=OFF -DARROW_GANDIVA=OFF \
-    -DARROW_GANDIVA_JAVA=OFF -DARROW_HDFS=ON -DARROW_HIVESERVER2=OFF \
-    -DARROW_ORC=OFF -DARROW_PARQUET=ON -DARROW_PLASMA=OFF\
-    -DARROW_PLASMA_JAVA_CLIENT=OFF -DARROW_PYTHON=OFF -DARROW_BUILD_TESTS=OFF \
-    -DARROW_BUILD_UTILITIES=OFF ..
-    make -j4 parquet_static && make install 
-    cd ${DEPS_SOURCE}
-    touch arrow_succ
 fi
 
