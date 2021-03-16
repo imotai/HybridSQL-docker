@@ -35,7 +35,7 @@ pushd "$DEPS_SOURCE"
 
 if ! command -v cmake ; then
     wget -q https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7-Linux-x86_64.tar.gz
-    tar xvzf cmake-3.*
+    tar xvz cmake-3.*
     pushd cmake-3.19.7-Linux-x86_64
     find . -type f -exec install -D -m 755 {} /usr/local/{} \; > /dev/null
     popd
@@ -45,7 +45,7 @@ fi
 if [ ! -f gtest_succ ]; then
     echo "installing gtest ...."
     wget -q $PACKAGE_MIRROR/googletest-release-1.10.0.tar.gz
-    tar xzvf googletest-release-1.10.0.tar.gz
+    tar xzf googletest-release-1.10.0.tar.gz
 
     pushd googletest-release-1.10.0
     cmake -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC
@@ -63,7 +63,7 @@ then
 else
     echo "installing zlib..."
     wget -q -O zlib-1.2.11.tar.gz https://github.com/madler/zlib/archive/v1.2.11.tar.gz
-    tar zxf zlib-1.2.11.tar.gz
+    tar xzf zlib-1.2.11.tar.gz
     pushd zlib-1.2.11
     sed -i '/CFLAGS="${CFLAGS--O3}"/c\  CFLAGS="${CFLAGS--O3} -fPIC"' configure
     ./configure --static --prefix="$DEPS_PREFIX"
@@ -132,7 +132,7 @@ then
     echo "unwind_exist"
 else
     wget -q $PACKAGE_MIRROR/libunwind-1.1.tar.gz
-    tar -zxvf libunwind-1.1.tar.gz
+    tar zxf libunwind-1.1.tar.gz
     pushd libunwind-1.1
     autoreconf -i
     ./configure --prefix="$DEPS_PREFIX"
@@ -147,7 +147,7 @@ then
     echo "gperf_tool exist"
 else
     wget -q $PACKAGE_MIRROR/gperftools-2.5.tar.gz
-    tar -zxvf gperftools-2.5.tar.gz
+    tar zxf gperftools-2.5.tar.gz
     pushd gperftools-2.5
     ./configure --enable-cpu-profiler --enable-heap-checker --enable-heap-profiler  --enable-static --prefix="$DEPS_PREFIX"
     make "-j$(nproc)"
@@ -171,7 +171,7 @@ then
     echo "leveldb exist"
 else
     wget -q $PACKAGE_MIRROR/leveldb.tar.gz
-    tar -zxvf leveldb.tar.gz
+    tar zxf leveldb.tar.gz
     pushd leveldb
     sed -i 's/^OPT ?= -O2 -DNDEBUG/OPT ?= -O2 -DNDEBUG -fPIC/' Makefile
     make "-j$(nproc)"
@@ -215,7 +215,7 @@ then
     echo "brpc exist"
 else
     wget -q $PACKAGE_MIRROR/incubator-brpc.tar.gz
-    tar -zxvf incubator-brpc.tar.gz
+    tar zxf incubator-brpc.tar.gz
     pushd incubator-brpc
     sh config_brpc.sh --with-glog --headers="$DEPS_PREFIX/include" --libs="$DEPS_PREFIX/lib"
     make "-j$(nproc)" libbrpc.a output/include
@@ -232,7 +232,7 @@ then
     echo "zk exist"
 else
     wget -q https://archive.apache.org/dist/zookeeper/zookeeper-3.5.7/apache-zookeeper-3.5.7.tar.gz
-    tar -zxvf apache-zookeeper-3.5.7.tar.gz
+    tar -zxf apache-zookeeper-3.5.7.tar.gz
     pushd apache-zookeeper-3.5.7/zookeeper-client/zookeeper-client-c && mkdir -p build
     cd build && cmake -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC ..  && make && make install
     popd
@@ -310,7 +310,7 @@ then
     echo "double-conversion exist"
 else
     wget -q https://github.com/google/double-conversion/archive/v3.1.5.tar.gz
-    tar -zxvf v3.1.5.tar.gz
+    tar -zxf v3.1.5.tar.gz
     pushd double-conversion-3.1.5
     mkdir -p build
     cd build
@@ -342,7 +342,7 @@ then
     echo " lz4 exist"
 else
     wget -q https://github.com/lz4/lz4/archive/v1.7.5.tar.gz
-    tar -zxvf lz4-1.7.5.tar.gz
+    tar -zxf lz4-1.7.5.tar.gz
     pushd lz4-1.7.5
     make -j"$(nproc)"
     make install PREFIX="$DEPS_PREFIX"
@@ -355,7 +355,7 @@ then
     echo "bzip2 installed"
 else
     wget -q https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz
-    tar -zxvf bzip2-1.0.8.tar.gz
+    tar -zxf bzip2-1.0.8.tar.gz
     pushd bzip2-1.0.8
     make -j"$(nproc)"
     make install PREFIX="$DEPS_PREFIX"
@@ -368,7 +368,7 @@ then
     echo "swig exist"
 else
     wget -q https://github.com/swig/swig/archive/v4.0.1.tar.gz
-    tar -zxvf swig-4.0.1.tar.gz
+    tar -zxf swig-4.0.1.tar.gz
     pushd swig-4.0.1
     ./autogen.sh
     ./configure --without-pcre --prefix="$DEPS_PREFIX"
@@ -383,7 +383,7 @@ then
     echo "jemalloc installed"
 else
     wget -q https://github.com/jemalloc/jemalloc/archive/5.2.1.tar.gz
-    tar -zxvf jemalloc-5.2.1.tar.gz
+    tar -zxf jemalloc-5.2.1.tar.gz
     pushd jemalloc-5.2.1
     ./autogen.sh
     ./configure --prefix="$DEPS_PREFIX"
@@ -398,7 +398,7 @@ then
     echo "flatbuffer installed"
 else
     wget -q https://github.com/google/flatbuffers/archive/v1.11.0.tar.gz
-    tar -zxvf flatbuffers-1.11.0.tar.gz
+    tar -zxf flatbuffers-1.11.0.tar.gz
     pushd flatbuffers-1.11.0
     mkdir -p build
     cd build
@@ -414,7 +414,7 @@ then
     echo "zstd installed"
 else
     wget -q https://github.com/facebook/zstd/releases/download/v1.4.4/zstd-1.4.4.tar.gz
-    tar -zxvf zstd-1.4.4.tar.gz
+    tar -zxf zstd-1.4.4.tar.gz
     pushd zstd-1.4.4
     make -j"$(nproc)"
     make install PREFIX="$DEPS_PREFIX"
@@ -427,7 +427,7 @@ then
     echo "yaml-cpp installed"
 else
     wget -q $PACKAGE_MIRROR/yaml-cpp-0.6.3.tar.gz
-    tar -zxvf yaml-cpp-0.6.3.tar.gz
+    tar -zxf yaml-cpp-0.6.3.tar.gz
     pushd yaml-cpp-yaml-cpp-0.6.3
     mkdir -p build
     cd build
@@ -472,7 +472,7 @@ then
     echo "boost exist"
 else
     wget -q $PACKAGE_MIRROR/boost_1_69_0.tar.gz
-    tar -zxvf boost_1_69_0.tar.gz
+    tar -zxf boost_1_69_0.tar.gz
     pushd boost_1_69_0
     ./bootstrap.sh
     ./b2 link=static cxxflags=-fPIC cflags=-fPIC release install --prefix="$DEPS_PREFIX"
@@ -485,7 +485,7 @@ then
     echo "thrift installed"
 else
     wget -q $PACKAGE_MIRROR/thrift-0.13.0.tar.gz
-    tar -zxvf thrift-0.13.0.tar.gz
+    tar -zxf thrift-0.13.0.tar.gz
     pushd thrift-0.13.0
     ./configure --enable-shared=no --enable-tests=no --with-python=no --with-nodejs=no --prefix="$DEPS_PREFIX" --with-boost="$DEPS_PREFIX"
     make -j"$(nproc)"
@@ -500,7 +500,7 @@ yum install -y devtoolset-7-libasan-devel-7.2.1-1.el6.x86_64.rpm libasan4-7.2.1-
 
 wget -q -O doxygen-1.8.19.src.tar.gz  https://github.com/doxygen/doxygen/archive/Release_1_8_19.tar.gz
 
-tar xzvf ./doxygen-1.8.19.src.tar.gz
+tar xzf ./doxygen-1.8.19.src.tar.gz
 
 cd ./doxygen-1.8.19/
 
