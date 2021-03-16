@@ -12,30 +12,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM centos:6
+FROM centos:6 AS base
 
 LABEL org.opencontainers.image.source https://github.com/4paradigm/HybridSQL-docker
 
-RUN rm -r /etc/yum.repos.d/*
-COPY --chown=root:root etc/yum.repos.d/CentOs-Base.repo /etc/yum.repos.d/
+# since centos 6 is dead, replace with a backup mirror
+RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+         -e 's|^#baseurl=http://mirror.centos.org/centos/|baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos-vault/|g' \
+         -i.bak \
+         /etc/yum.repos.d/CentOS-*.repo
 
-RUN yum update -y && \
-    yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 && \
+RUN yum update -y && yum install -y centos-release-scl && yum clean all
+
+RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+         -e 's|^#baseurl=http://mirror.centos.org/centos/|baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos-vault/|g' \
+         -i.bak \
+         /etc/yum.repos.d/CentOS-*.repo
+
+FROM base
+
+RUN yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 && \
     yum clean all
 
-ADD ./install_deps.sh /depends/
+COPY --chown=root:root ./install_deps.sh /depends/
 RUN cd /depends && source /opt/rh/devtoolset-7/enable && bash install_deps.sh
 
-ADD ./install_doxygen.sh /depends/
+COPY --chown=root:root ./install_doxygen.sh /depends/
 RUN /depends/install_doxygen.sh
 
-ADD ./install_gperftools.sh /depends/
+COPY --chown=root:root ./install_gperftools.sh /depends/
 RUN cd /depends && source /opt/rh/devtoolset-7/enable && bash /depends/install_gperftools.sh
 
 RUN wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.rpm && rpm -i scala-2.12.8.rpm && rm scala-2.12.8.rpm
 # RUN yum install -y nodejs npm
 
-ADD ./install_asan_centos6.sh /depends/
+COPY --chown=root:root ./install_asan_centos6.sh /depends/
 RUN cd /depends && bash /depends/install_asan_centos6.sh
 
 # Remove dynamic library files for static link
