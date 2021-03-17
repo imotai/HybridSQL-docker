@@ -17,13 +17,13 @@
 set -eE
 set -x
 
-source /opt/rh/devtoolset-7/enable
-source /opt/rh/sclo-git212/enable
+[ -r '/opt/rh/devtoolset-7/enable' ] && . /opt/rh/devtoolset-7/enable
+[ -r '/opt/rh/sclo-git212/enable' ] && . /opt/rh/sclo-git212/enable
+[ -r '/opt/rh/python27/enable' ] && . /opt/rh/python27/enable
 
 DEPS_SOURCE=$(pwd)/thirdsrc
 DEPS_PREFIX=$(pwd)/thirdparty
 DEPS_CONFIG="--prefix=${DEPS_PREFIX} --disable-shared --with-pic"
-PACKAGE_MIRROR=https://github.com/imotai/packages/raw/main/
 
 export CXXFLAGS=" -O3 -fPIC"
 export CFLAGS=" -O3 -fPIC"
@@ -36,6 +36,8 @@ if ! command -v nproc ; then
 fi
 
 pushd "$DEPS_SOURCE"
+
+yum install -y wget
 
 # install git lfs
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | bash
@@ -267,20 +269,6 @@ else
     touch bison_succ
 fi
 
-if [ -f "flex_succ" ]
-then
-    echo "flex exist"
-else
-    wget https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz
-    tar zxf flex-2.6.4.tar.gz
-    pushd flex-2.6.4
-    ./autogen.sh
-    ./configure --prefix="$DEPS_PREFIX"
-    make -j"$(nproc)" install
-    popd
-    touch flex_succ
-fi
-
 if [ -f "benchmark_succ" ]
 then
     echo "benchmark exist"
@@ -332,7 +320,7 @@ then
 else
     wget -O sqlite-3.32.3.zip https://github.com/sqlite/sqlite/archive/version-3.32.3.zip
     unzip sqlite-*.zip
-    pushd sqlite-3.32.3
+    pushd sqlite-version-3.32.3
     mkdir -p build
     cd build
     ../configure --prefix="$DEPS_PREFIX"

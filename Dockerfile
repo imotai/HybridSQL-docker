@@ -22,22 +22,25 @@ COPY --chown=root:root etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/
 RUN yum update -y && yum install -y centos-release-scl && yum clean all
 
 RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-         -e 's|^#\s*baseurl=http://mirror.centos.org/|baseurl=http://vault.centos.org/|g' \
-         -i.bak \
-         /etc/yum.repos.d/CentOS-SCLo-*.repo
+    -e 's|^#\s*baseurl=http://mirror.centos.org/|baseurl=http://vault.centos.org/|g' \
+    -i.bak \
+    /etc/yum.repos.d/CentOS-SCLo-*.repo
 
-RUN yum install -y devtoolset-7 sclo-git212 wget && yum clean all
+RUN yum install -y devtoolset-7 sclo-git212 && yum clean all
 
 COPY --chown=root:root etc/profile.d/enable-rh.sh /etc/profile.d/
 
 FROM base AS builder
 
-RUN yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 gettext-0.17 && \
+RUN yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 && \
+    gettext-0.17 flex-2.5.35 byacc-1.9.20070509 xz-4.999.9 python27-1.1 tcl-8.5.7 && \
     yum clean all
 
 COPY --chown=root:root ./install_deps.sh /depends/
 WORKDIR /depends
 RUN bash install_deps.sh
+
+COPY --chown=root:root etc/profile.d/enable-thirdparty.sh /etc/profile.d/
 
 FROM base
 
