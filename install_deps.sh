@@ -285,7 +285,8 @@ else
     wget https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz
     tar zxf flex-2.6.4.tar.gz
     pushd flex-2.6.4
-    ./autogen.sh && ./configure --prefix="$DEPS_PREFIX"
+    ./autogen.sh
+    ./configure --prefix="$DEPS_PREFIX"
     make -j"$(nproc)" install
     popd
     touch flex_succ

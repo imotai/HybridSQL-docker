@@ -30,7 +30,7 @@ RUN yum install -y devtoolset-7 sclo-git212 wget && yum clean all
 
 FROM base AS builder
 
-RUN yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 && \
+RUN yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 gettext-0.17 && \
     yum clean all
 
 COPY --chown=root:root ./install_deps.sh /depends/
