@@ -23,7 +23,7 @@ set -x
 
 DEPS_SOURCE=$(pwd)/thirdsrc
 DEPS_PREFIX=$(pwd)/thirdparty
-DEPS_CONFIG="--prefix=${DEPS_PREFIX} --disable-shared --with-pic"
+DEPS_CONFIG="--prefix=$DEPS_PREFIX --disable-shared --with-pic"
 
 export CXXFLAGS=" -O3 -fPIC"
 export CFLAGS=" -O3 -fPIC"
@@ -126,7 +126,7 @@ then
 else
     tar zxf gflags-2.2.0.tar.gz
     pushd gflags-2.2.0
-    cmake -DCMAKE_INSTALL_PREFIX="${DEPS_PREFIX}" -DGFLAGS_NAMESPACE=google -DCMAKE_CXX_FLAGS=-fPIC
+    cmake -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DGFLAGS_NAMESPACE=google -DCMAKE_CXX_FLAGS=-fPIC
     make "-j$(nproc)"
     make install
     popd
@@ -368,32 +368,8 @@ else
     touch thrift_succ
 fi
 
-echo "installing doxygen ..."
-wget -O doxygen-1.8.19.src.tar.gz  https://github.com/doxygen/doxygen/archive/Release_1_8_19.tar.gz
-tar xzf doxygen-1.8.19.src.tar.gz
-pushd doxygen-Release_1_8_19
-
-sed -i '/pedantic/d' ./cmake/CompilerWarnings.cmake
-sed -i '/double-promotion/d' ./cmake/CompilerWarnings.cmake
-mkdir build
-cd build
-cmake -G "Unix Makefiles" ..
-make -j"$(nproc)"
-make install
-
-echo "installed doxygen"
-popd
-
-# install maven
-wget https://mirrors.ocf.berkeley.edu/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
-tar xzf apache-maven-3.6.3-bin.tar.gz
-mv apache-maven-3.6.3 "$DEPS_PREFIX/maven"
-
-# install scala
-wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.rpm
-rpm -i scala-2.12.8.rpm
-rm scala-2.12.8.rpm
-
 # Remove dynamic library files for static link
-RUN find /depends/thirdparty/lib/ -name "lib*so*" | grep -v "libRemarks" | grep -v "libLTO" | xargs rm
-RUN find /depends/thirdparty/lib64/ -name "lib*so*" | grep -v "libRemarks" | grep -v "libLTO" | xargs rm
+find /depends/thirdparty/lib/ -name "lib*so*" | grep -v "libRemarks" | grep -v "libLTO" | xargs rm
+find /depends/thirdparty/lib64/ -name "lib*so*" | grep -v "libRemarks" | grep -v "libLTO" | xargs rm
+
+popd

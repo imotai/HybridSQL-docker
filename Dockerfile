@@ -40,11 +40,15 @@ COPY --chown=root:root ./install_deps.sh /depends/
 WORKDIR /depends
 RUN bash install_deps.sh
 
-COPY --chown=root:root etc/profile.d/enable-thirdparty.sh /etc/profile.d/
-
 FROM base
 
 COPY --from=builder /depends/thirdparty /depends/thirdparty
+
+COPY --chown=root:root etc/profile.d/enable-thirdparty.sh /etc/profile.d/
+
+COPY install_additional_deps.sh /
+RUN bash /install_additional_deps.sh && rm /install_additional_deps.sh
+RUN yum install java-1.8.0-openjdk-devel-1.8.0.275.b01 && yum clean all
 
 ENTRYPOINT [ "/bin/bash" ]
 
