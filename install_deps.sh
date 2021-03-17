@@ -309,6 +309,7 @@ else
     cmake -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" ..
     make -j"$(nproc)"
     make install
+    popd
     touch yaml_succ
 fi
 
@@ -382,6 +383,11 @@ make install
 
 echo "installed doxygen"
 popd
+
+# install maven
+wget https://mirrors.ocf.berkeley.edu/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+tar xzf apache-maven-3.6.3-bin.tar.gz
+mv apache-maven-3.6.3 "$DEPS_PREFIX/maven"
 
 # install scala
 wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.rpm
