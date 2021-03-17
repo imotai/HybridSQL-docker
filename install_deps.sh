@@ -234,23 +234,28 @@ else
     echo "brpc done"
 fi
 
-if [ -f "zk_succ" ]
-then
-    echo "zk exist"
-else
-    wget https://archive.apache.org/dist/zookeeper/zookeeper-3.5.7/apache-zookeeper-3.5.7.tar.gz
-    tar -zxf apache-zookeeper-3.5.7.tar.gz
-    pushd apache-zookeeper-3.5.7/zookeeper-client/zookeeper-client-c && mkdir -p build
-    cd build && cmake -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC ..  && make && make install
-    popd
-    touch zk_succ
-fi
+# if [ -f "zk_succ" ]
+# then
+#     echo "zk exist"
+# else
+#     wget https://archive.apache.org/dist/zookeeper/zookeeper-3.5.7/apache-zookeeper-3.5.7.tar.gz
+#     tar -zxf apache-zookeeper-3.5.7.tar.gz
+#     pushd apache-zookeeper-3.5.7/zookeeper-client/zookeeper-client-c
+#     mkdir -p build
+#     cd build
+#     cmake -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC ..
+#     make -j"$(nproc)"
+#     make install
+#     popd
+#     touch zk_succ
+#     echo "installed zookeeper c"
+# fi
 
 if [ -f "abseil_succ" ]
 then
     echo "abseil exist"
 else
-    wget $PACKAGE_MIRROR/abseil-cpp-20200923.3.tar.gz
+    wget -O abseil-cpp-20200923.3.tar.gz https://github.com/abseil/abseil-cpp/archive/20200923.3.tar.gz
     tar zxf abseil-cpp-20200923.3.tar.gz
     pushd abseil-cpp-20200923.3
     mkdir -p build && cd build
@@ -524,3 +529,12 @@ cmake -G "Unix Makefiles" ..
 make -j"$(nproc)"
 
 make install
+
+# install scala
+wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.rpm
+rpm -i scala-2.12.8.rpm
+rm scala-2.12.8.rpm
+
+# Remove dynamic library files for static link
+RUN find /depends/thirdparty/lib/ -name "lib*so*" | grep -v "libRemarks" | grep -v "libLTO" | xargs rm
+RUN find /depends/thirdparty/lib64/ -name "lib*so*" | grep -v "libRemarks" | grep -v "libLTO" | xargs rm

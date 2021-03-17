@@ -28,7 +28,7 @@ RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
 
 RUN yum install -y devtoolset-7 sclo-git212 wget && yum clean all
 
-FROM base
+FROM base AS builder
 
 RUN yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 && \
     yum clean all
@@ -37,11 +37,9 @@ COPY --chown=root:root ./install_deps.sh /depends/
 WORKDIR /depends
 RUN bash install_deps.sh
 
-RUN wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.rpm && rpm -i scala-2.12.8.rpm && rm scala-2.12.8.rpm
+FROM base
 
-# Remove dynamic library files for static link
-RUN find /depends/thirdparty/lib/ -name "lib*so*" | grep -v "libRemarks" | grep -v "libLTO" | xargs rm
-RUN find /depends/thirdparty/lib64/ -name "lib*so*" | grep -v "libRemarks" | grep -v "libLTO" | xargs rm
+COPY --from=builder /depends/thirdparty /depends/thirdparty
 
 ENTRYPOINT [ "/bin/bash" ]
 
