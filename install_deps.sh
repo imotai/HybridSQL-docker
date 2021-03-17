@@ -37,8 +37,6 @@ fi
 
 pushd "$DEPS_SOURCE"
 
-yum install -y wget
-
 # install git lfs
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | bash
 yum install -y git-lfs
@@ -359,6 +357,7 @@ if [ -f "thrift_succ" ]
 then
     echo "thrift installed"
 else
+    wget http://archive.apache.org/dist/thrift/0.13.0/thrift-0.13.0.tar.gz
     tar -zxf thrift-0.13.0.tar.gz
     pushd thrift-0.13.0
     ./configure --enable-shared=no --enable-tests=no --with-python=no --with-nodejs=no --prefix="$DEPS_PREFIX" --with-boost="$DEPS_PREFIX"
@@ -368,28 +367,21 @@ else
     touch thrift_succ
 fi
 
-wget http://ftp.iij.ad.jp/pub/linux/centos-vault/centos/6.9/sclo/x86_64/rh/devtoolset-7/libasan4-7.2.1-1.el6.x86_64.rpm
-wget http://ftp.iij.ad.jp/pub/linux/centos-vault/centos/6.9/sclo/x86_64/rh/devtoolset-7/devtoolset-7-libasan-devel-7.2.1-1.el6.x86_64.rpm
-yum install -y devtoolset-7-libasan-devel-7.2.1-1.el6.x86_64.rpm libasan4-7.2.1-1.el6.x86_64.rpm
-
+echo "installing doxygen ..."
 wget -O doxygen-1.8.19.src.tar.gz  https://github.com/doxygen/doxygen/archive/Release_1_8_19.tar.gz
-
-tar xzf ./doxygen-1.8.19.src.tar.gz
-
-cd ./doxygen-1.8.19/
+tar xzf doxygen-1.8.19.src.tar.gz
+pushd doxygen-Release_1_8_19
 
 sed -i '/pedantic/d' ./cmake/CompilerWarnings.cmake
 sed -i '/double-promotion/d' ./cmake/CompilerWarnings.cmake
-
 mkdir build
-
 cd build
-
 cmake -G "Unix Makefiles" ..
-
 make -j"$(nproc)"
-
 make install
+
+echo "installed doxygen"
+popd
 
 # install scala
 wget https://downloads.lightbend.com/scala/2.12.8/scala-2.12.8.rpm

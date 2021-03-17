@@ -26,14 +26,14 @@ RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
     -i.bak \
     /etc/yum.repos.d/CentOS-SCLo-*.repo
 
-RUN yum install -y devtoolset-7 sclo-git212 && yum clean all
+RUN yum install -y devtoolset-7-7.1 sclo-git212-1.0 devtoolset-7-libasan-devel-7.3.1 && yum clean all
 
 COPY --chown=root:root etc/profile.d/enable-rh.sh /etc/profile.d/
 
 FROM base AS builder
 
-RUN yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 && \
-    gettext-0.17 flex-2.5.35 byacc-1.9.20070509 xz-4.999.9 python27-1.1 tcl-8.5.7 && \
+RUN yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 \
+    gettext-0.17 flex-2.5.35 byacc-1.9.20070509 xz-4.999.9 python27-1.1 tcl-8.5.7 wget-1.12 && \
     yum clean all
 
 COPY --chown=root:root ./install_deps.sh /depends/
