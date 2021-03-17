@@ -262,7 +262,7 @@ else
     tar zxf bison-3.4.tar.gz
     pushd bison-3.4
     ./configure --prefix="$DEPS_PREFIX"
-    make "-j$(nproc)" install
+    make install
     popd
     touch bison_succ
 fi
