@@ -37,6 +37,14 @@ fi
 
 pushd "$DEPS_SOURCE"
 
+# install git lfs
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | bash
+yum install git-lfs
+git lfs install
+
+git clone https://github.com/imotai/packages .
+git lfs pull
+
 if ! command -v cmake ; then
     wget https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7-Linux-x86_64.tar.gz
     tar xzf cmake-3.*
@@ -48,7 +56,6 @@ fi
 
 if [ ! -f gtest_succ ]; then
     echo "installing gtest ...."
-    wget $PACKAGE_MIRROR/googletest-release-1.10.0.tar.gz
     tar xzf googletest-release-1.10.0.tar.gz
 
     pushd googletest-release-1.10.0
@@ -83,7 +90,6 @@ then
     echo "protobuf exist"
 else
     echo "start install protobuf ..."
-    wget $PACKAGE_MIRROR/protobuf-2.6.1.tar.gz
     tar zxf protobuf-2.6.1.tar.gz
 
     pushd protobuf-2.6.1
@@ -103,7 +109,6 @@ then
     echo "snappy exist"
 else
     echo "start install snappy ..."
-    wget $PACKAGE_MIRROR/snappy-1.1.1.tar.gz
     tar zxf snappy-1.1.1.tar.gz
     pushd snappy-1.1.1
     ./configure $DEPS_CONFIG
@@ -119,7 +124,6 @@ if [ -f "gflags_succ" ]
 then
     echo "gflags-2.1.1.tar.gz exist"
 else
-    wget $PACKAGE_MIRROR/gflags-2.2.0.tar.gz
     tar zxf gflags-2.2.0.tar.gz
     pushd gflags-2.2.0
     cmake -DCMAKE_INSTALL_PREFIX="${DEPS_PREFIX}" -DGFLAGS_NAMESPACE=google -DCMAKE_CXX_FLAGS=-fPIC
@@ -135,7 +139,6 @@ if [ -f "unwind_succ" ]
 then
     echo "unwind_exist"
 else
-    wget $PACKAGE_MIRROR/libunwind-1.1.tar.gz
     tar zxf libunwind-1.1.tar.gz
     pushd libunwind-1.1
     autoreconf -i
@@ -150,7 +153,6 @@ if [ -f "gperf_tool" ]
 then
     echo "gperf_tool exist"
 else
-    wget $PACKAGE_MIRROR/gperftools-2.5.tar.gz
     tar zxf gperftools-2.5.tar.gz
     pushd gperftools-2.5
     ./configure --enable-cpu-profiler --enable-heap-checker --enable-heap-profiler  --enable-static --prefix="$DEPS_PREFIX"
@@ -160,21 +162,10 @@ else
     touch gperf_tool
 fi
 
-# if [ -f "rapjson_succ" ]
-# then
-#     echo "rapjson exist"
-# else
-#     wget $PACKAGE_MIRROR/rapidjson.1.1.0.tar.gz
-#     tar -zxvf rapidjson.1.1.0.tar.gz
-#     cp -rf rapidjson-1.1.0/include/rapidjson "$DEPS_PREFIX/include"
-#     touch rapjson_succ
-# fi
-
 if [ -f "leveldb_succ" ]
 then
     echo "leveldb exist"
 else
-    wget $PACKAGE_MIRROR/leveldb.tar.gz
     tar zxf leveldb.tar.gz
     pushd leveldb
     sed -i 's/^OPT ?= -O2 -DNDEBUG/OPT ?= -O2 -DNDEBUG -fPIC/' Makefile
@@ -207,7 +198,6 @@ then
     echo "glog exist"
 else
     echo "installing glog ..."
-    wget $PACKAGE_MIRROR/glog-0.4.0.tar.gz
     tar xzf glog-0.4.0.tar.gz
     pushd glog-0.4.0
     ./autogen.sh && CXXFLAGS=-fPIC ./configure --prefix="$DEPS_PREFIX"
@@ -221,7 +211,6 @@ if [ -f "brpc_succ" ]
 then
     echo "brpc exist"
 else
-    wget $PACKAGE_MIRROR/incubator-brpc.tar.gz
     tar zxf incubator-brpc.tar.gz
     pushd incubator-brpc
     sh config_brpc.sh --with-glog --headers="$DEPS_PREFIX/include" --libs="$DEPS_PREFIX/lib"
@@ -308,75 +297,6 @@ else
     touch benchmark_succ
 fi
 
-# if [ -f "xz_succ" ]
-# then
-#     echo "zx exist"
-# else
-#     wget --no-check-certificate -O xz-5.2.4.tar.gz $PACKAGE_MIRROR/xz-5.2.4.tar.gz
-#     tar -zxvf xz-5.2.4.tar.gz
-#     cd xz-5.2.4 && ./configure --prefix=${DEPS_PREFIX} && make -j4 && make install
-#     cd -
-#     touch xz_succ
-# fi
-
-if [ -f "double-conversion_succ" ]
-then
-    echo "double-conversion exist"
-else
-    wget https://github.com/google/double-conversion/archive/v3.1.5.tar.gz
-    tar -zxf v3.1.5.tar.gz
-    pushd double-conversion-3.1.5
-    mkdir -p build
-    cd build
-    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC ..
-    make -j"$(nproc)"
-    make install
-    popd
-    touch double-conversion_succ
-fi
-
-# if [ -f "brotli_succ" ]
-# then
-#     echo "brotli exist"
-# else
-#     if [ -f "v1.0.7.tar.gz" ]
-#     then
-#         echo "brotli exist"
-#     else
-#         wget --no-check-certificate -O v1.0.7.tar.gz $PACKAGE_MIRROR/brotli-v1.0.7.tar.gz
-#     fi
-#     tar -zxvf v1.0.7.tar.gz
-#     mkdir ./brotli-1.0.7/build/ && cd ./brotli-1.0.7/build/ && ../configure-cmake --prefix=${DEPS_PREFIX} && make && make install
-#     cd -
-#     touch brotli_succ
-# fi
-
-if [ -f "lz4_succ" ]
-then
-    echo " lz4 exist"
-else
-    wget -O lz4-1.7.5.tar.gz https://github.com/lz4/lz4/archive/v1.7.5.tar.gz
-    tar -zxf lz4-1.7.5.tar.gz
-    pushd lz4-1.7.5
-    make -j"$(nproc)"
-    make install PREFIX="$DEPS_PREFIX"
-    popd
-    touch lz4_succ
-fi
-
-if [ -f "bzip2_succ" ]
-then
-    echo "bzip2 installed"
-else
-    wget https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz
-    tar -zxf bzip2-1.0.8.tar.gz
-    pushd bzip2-1.0.8
-    make -j"$(nproc)"
-    make install PREFIX="$DEPS_PREFIX"
-    popd
-    touch bzip2_succ
-fi
-
 if [ -f "swig_succ" ]
 then
     echo "swig exist"
@@ -392,55 +312,10 @@ else
     touch swig_succ
 fi
 
-if [ -f "jemalloc_succ" ]
-then
-    echo "jemalloc installed"
-else
-    wget -O jemalloc-5.2.1.tar.gz https://github.com/jemalloc/jemalloc/archive/5.2.1.tar.gz
-    tar -zxf jemalloc-5.2.1.tar.gz
-    pushd jemalloc-5.2.1
-    ./autogen.sh
-    ./configure --prefix="$DEPS_PREFIX"
-    make -j"$(nproc)"
-    make install
-    popd
-    touch jemalloc_succ
-fi
-
-if [ -f "flatbuffer_succ" ]
-then
-    echo "flatbuffer installed"
-else
-    wget -O flatbuffers-1.11.0.tar.gz https://github.com/google/flatbuffers/archive/v1.11.0.tar.gz
-    tar -zxf flatbuffers-1.11.0.tar.gz
-    pushd flatbuffers-1.11.0
-    mkdir -p build
-    cd build
-    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$DEPS_PREFIX" -DCMAKE_CXX_FLAGS=-fPIC ..
-    make -j"$(nproc)"
-    make install
-    popd
-    touch flatbuffer_succ
-fi
-
-if [ -f "zstd_succ" ]
-then
-    echo "zstd installed"
-else
-    wget https://github.com/facebook/zstd/releases/download/v1.4.4/zstd-1.4.4.tar.gz
-    tar -zxf zstd-1.4.4.tar.gz
-    pushd zstd-1.4.4
-    make -j"$(nproc)"
-    make install PREFIX="$DEPS_PREFIX"
-    popd
-    touch zstd_succ
-fi
-
 if [ -f "yaml_succ" ]
 then
     echo "yaml-cpp installed"
 else
-    wget $PACKAGE_MIRROR/yaml-cpp-0.6.3.tar.gz
     tar -zxf yaml-cpp-0.6.3.tar.gz
     pushd yaml-cpp-yaml-cpp-0.6.3
     mkdir -p build
@@ -470,7 +345,6 @@ if [ -f "llvm_succ" ]
 then
     echo "llvm_exist"
 else
-    wget $PACKAGE_MIRROR/llvm-9.0.0.src.tar.xz
     tar xf llvm-9.0.0.src.tar.xz
     pushd llvm-9.0.0.src
     mkdir -p build && cd build
@@ -485,7 +359,6 @@ if [ -f "boost_succ" ]
 then
     echo "boost exist"
 else
-    wget $PACKAGE_MIRROR/boost_1_69_0.tar.gz
     tar -zxf boost_1_69_0.tar.gz
     pushd boost_1_69_0
     ./bootstrap.sh
@@ -498,7 +371,6 @@ if [ -f "thrift_succ" ]
 then
     echo "thrift installed"
 else
-    wget $PACKAGE_MIRROR/thrift-0.13.0.tar.gz
     tar -zxf thrift-0.13.0.tar.gz
     pushd thrift-0.13.0
     ./configure --enable-shared=no --enable-tests=no --with-python=no --with-nodejs=no --prefix="$DEPS_PREFIX" --with-boost="$DEPS_PREFIX"
