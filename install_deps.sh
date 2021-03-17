@@ -39,7 +39,7 @@ pushd "$DEPS_SOURCE"
 
 # install git lfs
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | bash
-yum install git-lfs
+yum install -y git-lfs
 git lfs install
 
 git clone https://github.com/imotai/packages .

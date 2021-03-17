@@ -28,7 +28,7 @@ RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
 
 RUN yum install -y devtoolset-7 sclo-git212 wget && yum clean all
 
-COPY etc/profile.d/enable-rh.sh /etc/profile.d/
+COPY --chown=root:root etc/profile.d/enable-rh.sh /etc/profile.d/
 
 FROM base AS builder
 
