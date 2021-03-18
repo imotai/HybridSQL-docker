@@ -27,7 +27,7 @@ RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
     /etc/yum.repos.d/CentOS-SCLo-*.repo
 
 RUN yum install -y devtoolset-7-7.1 sclo-git212-1.0 devtoolset-7-libasan-devel-7.3.1 flex-2.5.35 \
-    autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 && \
+    autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 python27-1.1 && \
     yum clean all
 
 COPY --chown=root:root etc/profile.d/enable-rh.sh /etc/profile.d/
@@ -36,13 +36,13 @@ COPY --chown=root:root etc/profile.d/enable-rh.sh /etc/profile.d/
 FROM base AS builder
 
 WORKDIR /depends/thirdsrc
-
 # install cmake
-ADD https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7-Linux-x86_64.tar.gz .  RUN tar xzf cmake-3.19.*
+ADD https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7-Linux-x86_64.tar.gz .
+RUN tar xzf cmake-3.19.*
 WORKDIR /depends/thirdsrc/cmake-3.19.7-Linux-x86_64
 RUN find . -type f -exec install -D -m 755 {} /usr/local/{} \; > /dev/null
 
-RUN yum install -y gettext-0.17 byacc-1.9.20070509 xz-4.999.9 python27-1.1 tcl-8.5.7 wget-1.12 && \
+RUN yum install -y gettext-0.17 byacc-1.9.20070509 xz-4.999.9 tcl-8.5.7 wget-1.12 && \
     yum clean all
 
 WORKDIR /depends

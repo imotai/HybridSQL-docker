@@ -1,4 +1,6 @@
-[ -d /depends/thirdparty/bin ] && export PATH=/depends/thirdparty/bin:$PATH
+if [ -d /depends/thirdparty/bin ]; then
+    export PATH=/depends/thirdparty/bin:$PATH
+fi
 
 if [ -d /depends/thirdparty/jdk ] ; then
     export JAVA_HOME=/depends/thirdparty/jdk
