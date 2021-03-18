@@ -38,7 +38,8 @@ FROM base AS builder
 WORKDIR /depends/thirdsrc
 
 # install cmake
-ADD https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7-Linux-x86_64.tar.gz .  RUN tar xzf cmake-3.19.*
+ADD https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7-Linux-x86_64.tar.gz .
+RUN tar xzf cmake-3.19.*
 WORKDIR /depends/thirdsrc/cmake-3.19.7-Linux-x86_64
 RUN find . -type f -exec install -D -m 755 {} /usr/local/{} \; > /dev/null
 
