@@ -22,33 +22,54 @@ COPY --chown=root:root etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/
 RUN yum update -y && yum install -y centos-release-scl && yum clean all
 
 RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-    -e 's|^#\s*baseurl=http://mirror.centos.org/|baseurl=http://vault.centos.org/|g' \
+    -e 's|^#\s*baseurl=http://mirror.centos.org/|baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos-vault/|g' \
     -i.bak \
     /etc/yum.repos.d/CentOS-SCLo-*.repo
 
-RUN yum install -y devtoolset-7-7.1 sclo-git212-1.0 devtoolset-7-libasan-devel-7.3.1 && yum clean all
+RUN yum install -y devtoolset-7-7.1 sclo-git212-1.0 devtoolset-7-libasan-devel-7.3.1 flex-2.5.35 \
+    autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 && \
+    yum clean all
 
 COPY --chown=root:root etc/profile.d/enable-rh.sh /etc/profile.d/
 
+
 FROM base AS builder
 
-RUN yum install -y autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 \
-    gettext-0.17 flex-2.5.35 byacc-1.9.20070509 xz-4.999.9 python27-1.1 tcl-8.5.7 wget-1.12 && \
+WORKDIR /depends/thirdsrc
+
+# install cmake
+ADD https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7-Linux-x86_64.tar.gz .  RUN tar xzf cmake-3.19.*
+WORKDIR /depends/thirdsrc/cmake-3.19.7-Linux-x86_64
+RUN find . -type f -exec install -D -m 755 {} /usr/local/{} \; > /dev/null
+
+RUN yum install -y gettext-0.17 byacc-1.9.20070509 xz-4.999.9 python27-1.1 tcl-8.5.7 wget-1.12 && \
     yum clean all
 
-COPY --chown=root:root ./install_deps.sh /depends/
 WORKDIR /depends
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | bash && \
+    yum install -y git-lfs && \
+    git lfs install && \
+    git clone https://github.com/imotai/packages . && \
+    git lfs pull
+
+COPY --chown=root:root ./install_deps.sh /depends/
+
 RUN bash install_deps.sh
+
+RUN tar cvzf thirdparty.tar.gz thirdparty/
+
+
 
 FROM base
 
-COPY --from=builder /depends/thirdparty /depends/thirdparty
-
-COPY --chown=root:root etc/profile.d/enable-thirdparty.sh /etc/profile.d/
+COPY etc/profile.d/enable-thirdparty.sh /etc/profile.d/
+COPY --from=builder /usr/local/* /usr/local/
 
 COPY install_additional_deps.sh /
 RUN bash /install_additional_deps.sh && rm /install_additional_deps.sh
-RUN yum install java-1.8.0-openjdk-devel-1.8.0.275.b01 && yum clean all
+RUN yum install -y java-1.8.0-openjdk-devel-1.8.0.275.b01 && yum clean all
+
+COPY --from=builder /depends/thirdparty.tar.gz /depends/
 
 ENTRYPOINT [ "/bin/bash" ]
 

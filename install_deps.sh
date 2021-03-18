@@ -37,23 +37,6 @@ fi
 
 pushd "$DEPS_SOURCE"
 
-# install git lfs
-curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | bash
-yum install -y git-lfs
-git lfs install
-
-git clone https://github.com/imotai/packages .
-git lfs pull
-
-if ! command -v cmake ; then
-    wget https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7-Linux-x86_64.tar.gz
-    tar xzf cmake-3.*
-    pushd cmake-3.19.7-Linux-x86_64
-    find . -type f -exec install -D -m 755 {} /usr/local/{} \; > /dev/null
-    popd
-    echo "installed cmake"
-fi
-
 if [ ! -f gtest_succ ]; then
     echo "installing gtest ...."
     tar xzf googletest-release-1.10.0.tar.gz
