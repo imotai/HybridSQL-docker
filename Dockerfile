@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+ARG MIRROR=http://vault.centos.org
+
 FROM centos:6 AS base
+ARG MIRROR
 
 LABEL org.opencontainers.image.source https://github.com/4paradigm/HybridSQL-docker
 
@@ -22,7 +25,7 @@ COPY --chown=root:root etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/
 RUN yum update -y && yum install -y centos-release-scl epel-release && yum clean all
 
 RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
-    -e 's|^#\s*baseurl=http://mirror.centos.org/|baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos-vault/|g' \
+    -e "s|^#\s*baseurl=http://mirror.centos.org/|baseurl=${MIRROR}/|g" \
     -i.bak \
     /etc/yum.repos.d/CentOS-SCLo-*.repo
 
