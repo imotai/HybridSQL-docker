@@ -19,7 +19,7 @@ LABEL org.opencontainers.image.source https://github.com/4paradigm/HybridSQL-doc
 # since centos 6 is dead, replace with a backup mirror
 COPY --chown=root:root etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/
 
-RUN yum update -y && yum install -y centos-release-scl && yum clean all
+RUN yum update -y && yum install -y centos-release-scl epel-release && yum clean all
 
 RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
     -e 's|^#\s*baseurl=http://mirror.centos.org/|baseurl=https://mirrors.tuna.tsinghua.edu.cn/centos-vault/|g' \
@@ -27,7 +27,8 @@ RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
     /etc/yum.repos.d/CentOS-SCLo-*.repo
 
 RUN yum install -y devtoolset-7-7.1 sclo-git212-1.0 devtoolset-7-libasan-devel-7.3.1 flex-2.5.35 \
-    autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 python27-1.1 && \
+    autoconf-2.63 automake-1.11.1 unzip-6.0 bc-1.06.95 expect-5.44.1.15 libtool-2.2.6 python27-1.1 \
+    java-1.8.0-openjdk-devel-1.8.0.275.b01 lcov-1.10 && \
     yum clean all
 
 COPY --chown=root:root etc/profile.d/enable-rh.sh /etc/profile.d/
@@ -35,41 +36,32 @@ COPY --chown=root:root etc/profile.d/enable-rh.sh /etc/profile.d/
 
 FROM base AS builder
 
-WORKDIR /depends/thirdsrc
-# install cmake
-ADD https://github.com/Kitware/CMake/releases/download/v3.19.7/cmake-3.19.7-Linux-x86_64.tar.gz .
-RUN tar xzf cmake-3.19.*
-WORKDIR /depends/thirdsrc/cmake-3.19.7-Linux-x86_64
-RUN find . -type f -exec install -D -m 755 {} /usr/local/{} \; > /dev/null
-
-RUN yum install -y gettext-0.17 byacc-1.9.20070509 xz-4.999.9 tcl-8.5.7 wget-1.12 && \
+RUN yum install -y gettext-0.17 byacc-1.9.20070509 xz-4.999.9 tcl-8.5.7 && \
     yum clean all
 
 WORKDIR /depends
-RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | bash && \
-    yum install -y git-lfs && \
-    git lfs install && \
-    git clone https://github.com/imotai/packages . && \
-    git lfs pull
 
-COPY --chown=root:root ./install_deps.sh /depends/
+COPY --chown=root:root *.sh .
+
+RUN bash fetch_resource.sh
 
 RUN bash install_deps.sh
 
 RUN tar cvzf thirdparty.tar.gz thirdparty/
 
-
-
 FROM base
 
 COPY etc/profile.d/enable-thirdparty.sh /etc/profile.d/
-COPY --from=builder /usr/local/* /usr/local/
+COPY --from=builder /usr/local/ /usr/
 
-COPY install_additional_deps.sh /
-RUN bash /install_additional_deps.sh && rm /install_additional_deps.sh
-RUN yum install -y java-1.8.0-openjdk-devel-1.8.0.275.b01 && yum clean all
+WORKDIR /depends/thirdsrc
+COPY --from=builder /depends/thirdsrc/scala-2.12.8.rpm .
+RUN rpm -i scala-2.12.8.rpm && rm ./*.rpm
 
+# use compressed in order to reduce image size
 COPY --from=builder /depends/thirdparty.tar.gz /depends/
+
+WORKDIR /root
 
 ENTRYPOINT [ "/bin/bash" ]
 

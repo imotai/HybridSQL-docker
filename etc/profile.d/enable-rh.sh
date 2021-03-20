@@ -1,10 +1,10 @@
-if [ -r '/opt/rh/devtoolset-7/enable' ] ; then
-    source /opt/rh/devtoolset-7/enable
+if [ -d '/opt/rh/devtoolset-7' ] ; then
+    scl enable devtoolset-7 bash
 fi
 
-if [ -r '/opt/rh/sclo-git212/enable' ] ; then
-    source /opt/rh/sclo-git212/enable
+if [ -d '/opt/rh/sclo-git212' ] ; then
+    scl enable sclo-git212 bash
 fi
-if [ -r '/opt/rh/python27/enable' ] ; then
-    source /opt/rh/python27/enable
+if [ -d '/opt/rh/python27' ] ; then
+    scl enable python27 bash
 fi
