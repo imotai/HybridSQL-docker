@@ -38,6 +38,7 @@ fetch()
     fi
 }
 
+mkdir -p "$DOWNLOAD_DIR"
 pushd "$DOWNLOAD_DIR"
 
 echo -e "${GREEN}downloading resource into $DOWNLOAD_DIR${NC}"
