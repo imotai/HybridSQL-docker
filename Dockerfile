@@ -44,7 +44,7 @@ RUN yum install -y gettext-0.17 byacc-1.9.20070509 xz-4.999.9 tcl-8.5.7 && \
 
 WORKDIR /depends
 
-COPY --chown=root:root *.sh .
+COPY --chown=root:root *.sh ./
 
 RUN bash fetch_resource.sh
 
@@ -58,7 +58,7 @@ COPY etc/profile.d/enable-thirdparty.sh /etc/profile.d/
 COPY --from=builder /usr/local/ /usr/
 
 WORKDIR /depends/thirdsrc
-COPY --from=builder /depends/thirdsrc/scala-2.12.8.rpm .
+COPY --from=builder /depends/thirdsrc/scala-2.12.8.rpm ./
 RUN rpm -i scala-2.12.8.rpm && rm ./*.rpm
 
 # use compressed in order to reduce image size
