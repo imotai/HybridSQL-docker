@@ -34,7 +34,7 @@ Development Dockerfile for HybridSQL
 | libunwind | 1.1 | /depends/thirdparty | [libunwind](https://github.com/libunwind/libunwind) | dependency | lib |
 | gperftools | 2.5 | /depends/thirdparty | [gperftools](https://github.com/gperftools/gperftools) | dependency | lib |
 | leveldb | 1.20 | /depends/thirdparty | [leveldb](https://github.com/google/leveldb) | dependency | lib |
-| incubator brpc | | /depends/thirdparty | [incubator-brpc](https://github.com/apache/incubator-brpc) | dependency | lib |
+| incubator brpc | 0.9.7 | /depends/thirdparty | [incubator-brpc](https://github.com/apache/incubator-brpc) | dependency | lib |
 | bison | 3.4 | /depends/thirdparty | [bison](https://www.gnu.org/software/bison/) | dependency | lib |
 | flex | 2.5.35 | /usr | [flex](https://github.com/westes/flex) | dependency | tool & lib |
 | google benchmark | 1.5.0 | /depends/thirdparty | [benchmark](https://github.com/google/benchmark) | dependency | lib |
