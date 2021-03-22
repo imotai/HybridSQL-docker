@@ -13,3 +13,17 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         HADOLINT_ACTION_DOCKERFILE_FOLDER: .
+
+  shellcheck:
+    name: hadolint on pr
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: shellcheck
+      uses: reviewdog/action-shellcheck@v1
+      with:
+        github_token: ${{ secrets.github_token }}
+        reporter: github-pr-review
+        path: "."
+        pattern: "*.sh"
+        exclude: "./.git/*"
