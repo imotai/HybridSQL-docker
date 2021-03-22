@@ -1,4 +1,4 @@
-name: Docker
+name: Docker build and publish
 
 on:
   push:
@@ -20,8 +20,6 @@ jobs:
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
   build-and-publish:
-    # Ensure test job passes before pushing image.
-    needs: test
 
     runs-on: ubuntu-latest
 

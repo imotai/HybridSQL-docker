@@ -15,7 +15,7 @@ jobs:
         HADOLINT_ACTION_DOCKERFILE_FOLDER: .
 
   shellcheck:
-    name: hadolint on pr
+    name: shellcheck
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
